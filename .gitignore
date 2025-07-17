@@ -1,0 +1,4 @@
+.vscode/*
+assets/*
+build/*
+tools/checksum/build/*

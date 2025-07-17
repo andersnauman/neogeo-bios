@@ -1,0 +1,78 @@
+# .github/workflows/release.yml
+name: Build & Release (multiple bios variants)
+
+on:
+  push:
+    tags:
+      - "v*"           # Run only for version tags like v1.4.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - name: mvs-eu
+            SYSTEM: MVS
+            REGION: EUROPE
+            BUILD_TYPE: Release
+          - name: mvs-us
+            SYSTEM: MVS
+            REGION: USA
+            BUILD_TYPE: Release
+          - name: mvs-jp
+            SYSTEM: MVS
+            REGION: JAPAN
+            BUILD_TYPE: Release
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install CMake and m68k cross-compiler (${{ matrix.name }})
+      run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends cmake gcc-m68k-linux-gnu libc6-dev-m68k-cross
+
+    - name: Configure CMake (${{ matrix.name }})
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{ matrix.BUILD_TYPE }} -DSYSTEM=${{ matrix.SYSTEM }} -DREGION=${{ matrix.REGION }}
+
+    - name: Build (${{ matrix.name }})
+      run: cmake --build ${{github.workspace}}/build --config ${{ matrix.BUILD_TYPE }}
+      
+    - name: Build (${{ matrix.name }})
+      run: cmake --build build --parallel
+
+    - name: Package (${{ matrix.name }})
+      run: |
+        mkdir dist
+        cp build/neogeo/sp-s2.sp1 dist/neogeo-bios-${{ matrix.name }}-${{ github.ref_name }}.bin
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ matrix.name }}
+        path: dist/*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Collect all artefacts
+      run: |
+        mkdir -p dist
+        find artifacts -type f -exec cp {} dist/ \;
+
+    - name: Publish GitHub Release
+      uses: ncipollo/release-action@v1
+      with:
+        tag:        ${{ github.ref }}
+        name:       Release ${{ github.ref_name }}
+        draft:      false
+        prerelease: false
+        artifacts:  "dist/*"
+        token:      ${{ secrets.GITHUB_TOKEN }}
