@@ -6,6 +6,9 @@ on:
     tags:
       - "v*"           # Run only for version tags like v1.4.0
 
+permissions:
+  contents: write 
+
 jobs:
   build:
     runs-on: ubuntu-latest
