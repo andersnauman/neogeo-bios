@@ -27,7 +27,7 @@ apt-get install cmake gcc-m68k-linux-gnu
 ### Installation
 1. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/neogeo-projects/neogeo-bios.git
    ```
 2. Build the ROM-file
    ```sh
@@ -42,7 +42,7 @@ apt-get install cmake gcc-m68k-linux-gnu
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/neogeo-projects/neogeo-bios.git
    ```
 2. Copy following files into the `assets` folder (you need to provide these yourself)
     ```sh
@@ -61,6 +61,17 @@ apt-get install cmake gcc-m68k-linux-gnu
     ```sh
     mame neogeo -rompath ./ -skip_gameinfo -verbose -debug [gamename]
     ```
+#### File hierarchy
+```sh
+build/
+└── neogeo/
+    ├── sp-s2.sp1
+    ├── 000-lo.lo
+    ├── sfix.sfix
+    ├── sm1.sm1
+    ├── mslug/
+    └── nam1975/
+```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -76,10 +87,10 @@ apt-get install cmake gcc-m68k-linux-gnu
 ## Game compability
 Development has mainly focused on games that differ from one another in their features and BIOS usage. Hopefully, this list will grow more and more quickly as development progresses.
 
-| Game       | Console | Status          |
-| ---------- | ------- | --------------- |
-| Metal slug | MV1FZS  | Boot, > stage 1 |
-| NAM 1975   | MV1FZS  | Boot, > stage 1 |
+| Game       | Console | Status             |
+| ---------- | ------- | ------------------ |
+| Metal slug | MV1FZS  | Boot, Runs stage 1 |
+| NAM 1975   | MV1FZS  | Boot, Runs stage 1 |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
