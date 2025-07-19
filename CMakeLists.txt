@@ -86,7 +86,7 @@ add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
 )
 
 # Convert ELF to raw binary
-# Raw binary means little endian, most convert it back to big endian.
+# Raw binary means little endian, must convert it back to big endian.
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
     COMMAND ${OBJCOPY} -O binary --pad-to=0xC20000 --gap-fill 0xFF ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.elf ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.swp
     COMMENT "Creating raw BIOS ROM image"
