@@ -10,7 +10,6 @@
 
 #include "bios.h"
 
-uint16_t frame_counter = 0;
 uint8_t menu = MENU_CROSSHATCH;
 
 void init() {
@@ -38,9 +37,7 @@ void init() {
         request_reset_backup = 1;
     }
     if (1 == request_reset_backup) {
-        if (0 == *REG_DIPSW) {
-            reset_backup_ram();
-        }        
+        reset_backup_ram();
     }
 
     test_rtc();
@@ -56,31 +53,7 @@ void init() {
         *BIOS_MVS_FLAG = 0x00;
     }
     
-    *BIOS_COUNTRY_CODE = *SROM_COUNTRY_CODE;  
-
-    // Test user-ram, why only 7fff? because 8000 * 2 == 10000
-    // Test backup-ram string, if all dip switch are down, jump to test user-ram again(?) and than zero + write backup ram from fixed variables.
-    // if rewrite, write 0x23 -> 0xd00122 and then 0xffff * 8 -> 0xd00124+
-    // 0xf0f0f0f0 -> 0xd001ac
-    // 0xffff -> 0xd001b0
-    // test vram
-    // If all dipswitch low
-    //      loop until dipswitch not low
-    // else
-    // test RTC
-    // wait_for_rtc_pulse_edge()
-    // start frame_counter
-    // enable interrupts
-    // send 0x8 command to RTC
-    // wait_for_rtc_pulse_edge()
-    // disable interrupts
-    // send 0x7 command to RTC
-    // check if frame is > 57 and < 64
-    // checksum-check
-    //      add each byte of 0x00->0x7F to a uint8_t. watchdog each run
-    //      add each byte of 0xC00082->0xC1FFFF to same uint_8. watchdog each run
-    //      compare with 0xc00080
-    // check memcard inserted and header string
+    *BIOS_COUNTRY_CODE = *SROM_COUNTRY_CODE;
 
     setup_backup_ram();
     controller_setup();

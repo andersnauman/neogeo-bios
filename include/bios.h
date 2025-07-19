@@ -207,8 +207,6 @@ typedef void (*subr_fn_t)(void);
 #define SUBR_CART_DEMO_END     ((subr_fn_t)0x00012E)    // DEMO_END = 0x00012E
 #define SUBR_CART_COIN_SOUND   ((subr_fn_t)0x000134)    // COIN_SOUND = 0x000134
 
-extern uint16_t frame_counter;
-
 #define BIOS_COUNTRY_JAPAN  0
 #define BIOS_COUNTRY_USA    1
 #define BIOS_COUNTRY_EUROPE 2
