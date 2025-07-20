@@ -3,6 +3,7 @@
 #include "backup_ram.h"
 #include "bios.h"
 #include "graphic.h"
+#include "led.h"
 #include "mess_out.h"
 #include "utils.h"
 
@@ -124,7 +125,7 @@ void update_io_test() {
     uint8_t frame_count_low = *BIOS_FRAME_COUNTER_LOW;
 
     if ((frame_count_low & 0x3F) == 0) {
-        // EL
+        // EL (Marquee)
         *SERVICE_LED_MARQUEE += 1;
         if (*SERVICE_LED_MARQUEE > *BRAM_SLOT_COUNT) {
             *SERVICE_LED_MARQUEE = 1;
@@ -136,19 +137,19 @@ void update_io_test() {
         }
     }
     // EL (Marquee) 
-    // TODO: Change the EL
+    set_led_data(LED_LATCH_MARQUEE, *SERVICE_LED_MARQUEE);
     uint16_t marquee_led_slot = *SERVICE_LED_MARQUEE | 0x30;
     *(volatile uint16_t *)address = marquee_led_slot << 8 | 0x20;
     address += 2;
 
     // LED 1
-    // TODO: Change the LED
+    set_led_data(LED_LATCH_LED1, *SERVICE_LED_COIN);
     uint16_t coin_led = *SERVICE_LED_COIN | 0x30;
     *(volatile uint16_t *)address = coin_led << 8 | coin_led;
     address += 2;
 
     // LED 2
-    // TODO: Change the LED
+    set_led_data(LED_LATCH_LED2, (10 - *SERVICE_LED_COIN));
     coin_led = (10 - *SERVICE_LED_COIN) | 0x30;
     *(volatile uint16_t *)address = coin_led << 8 | coin_led;
     address += 2;

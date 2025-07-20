@@ -43,6 +43,7 @@ add_executable(${PROJECT_NAME}.elf
     "src/how_to_play.c"
     "src/input.c"
     "src/interrupt.c"
+    "src/led.c"
     "src/main.c"
     "src/mess_out.c"
     "src/service.c"
