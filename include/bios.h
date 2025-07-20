@@ -186,6 +186,10 @@ Game tells the BIOS where it is:
 #define BIOS_STATCURRENT_RAW    ((volatile uint8_t *)  0x10FEDC)
 #define BIOS_STATCHANGE_RAW     ((volatile uint8_t *)  0x10FEDD)
 
+// SYSTEM registers
+#define SROM_MVS_FLAG     ((volatile uint8_t *) 0xC00400)   // 0=AES, 0x80=MVS
+#define SROM_COUNTRY_CODE ((volatile uint8_t *) 0xC00401)   // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
+
 // ROM registers
 #define ROM_NGH_NUMER            ((volatile uint16_t *) 0x000108)   // The game's identifying number, used for memory card saves and MVS bookkeeping.
 #define ROM_PROGRAM_SIZE         ((volatile uint32_t *) 0x00010A)   // The size of the program (in bytes).

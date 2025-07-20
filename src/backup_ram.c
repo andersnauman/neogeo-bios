@@ -146,19 +146,42 @@ void load_game_data() {
         *BRAM_SLOT_NGH_ID(block) = (*ROM_NGH_NUMER << 16) | (uint16_t)block;
 
         // Insert game name and dip settings
-        if (*BIOS_COUNTRY_CODE == BIOS_COUNTRY_JAPAN) {
-            memcpy((void *)BRAM_GAME_NAME(block), (const void *) *ROM_JPN_SOFTDIP, 16);
-            memcpy((void *)BRAM_GAME_DIP_SETTINGS(block), (const void *) *ROM_JPN_SOFTDIP + 16, 16);
-        } else if (*BIOS_COUNTRY_CODE == BIOS_COUNTRY_USA) {
-            memcpy((void *)BRAM_GAME_NAME(block), (const void *) *ROM_USA_SOFTDIP, 16);
-            memcpy((void *)BRAM_GAME_DIP_SETTINGS(block), (const void *) *ROM_USA_SOFTDIP + 16, 16);
-        } else if (*BIOS_COUNTRY_CODE == BIOS_COUNTRY_EUROPE) {
-            memcpy((void *)BRAM_GAME_NAME(block), (const void *) *ROM_EU_SOFTDIP, 16);
-            memcpy((void *)BRAM_GAME_DIP_SETTINGS(block), (const void *) *ROM_EU_SOFTDIP + 16, 16);
+        uint8_t region = *SROM_COUNTRY_CODE;
+        uint32_t dips_addr = ROM_SOFTDIP_TABLE[region];
+        volatile uint8_t *dips = (volatile uint8_t *)(uint32_t)dips_addr;
+
+        // Copy the game name to backup ram block
+        for (uint8_t i = 0; i < 16; i++) {
+            BRAM_GAME_NAME(block)[i] = *dips;
+            dips++;
+        }
+
+        /*
+            Metal Slug default dipsw
+
+            12 38 04 12 12 02 01 04 03 00
+            continue        12      off/on*
+            difficulty      38      1,2,3,4*,5,6,7,8
+            play time       04      60*,70,80,90
+            demo sound      12      off,on*
+            play manual     12      off,on*
+            blood           02      off*,on
+
+        */
+
+        // Copy timed/counter options
+        for (uint8_t i = 0; i < 6; i++) {
+            BRAM_GAME_DIP_SETTINGS(block)[i] = *dips;
+            dips++;
+        }
+        // Get default values for all 10 potential soft dips.
+        for (uint8_t i = 6; i < 16; i++) {
+            BRAM_GAME_DIP_SETTINGS(block)[i] = *dips >> 4;
+            dips++;
         }
     }
 
-    // Copy backup-data into workram
+    // Copy backup-data into workram (where the game expect to find it)
     volatile uint8_t *bram_game_data = BRAM_GAME_BLOCK(block);
     volatile uint8_t *rom_game_data = (volatile uint8_t *) *ROM_BACKUP_RAM_PTR;
 
@@ -172,14 +195,8 @@ void load_game_data() {
     }
 
     // Load dip settings
-    // Get timed/counter options
-    for (uint8_t i = 0; i < 6; i++) {
+    for (uint8_t i = 0; i < 16; i++) {
         BIOS_GAME_DIP[i] = BRAM_GAME_DIP_SETTINGS(block)[i];
-    }
-
-    // Get default values for all 10 potential soft dips.
-    for (uint8_t i = 6; i < 16; i++) {
-        BIOS_GAME_DIP[i] = BRAM_GAME_DIP_SETTINGS(block)[i] >> 4;
     }    
 
     *REG_SWPBIOS = 0;
