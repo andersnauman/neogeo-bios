@@ -2,6 +2,7 @@
 
 #include "backup_ram.h"
 #include "bios.h"
+#include "calendar.h"
 #include "coin.h"
 #include "eyecatcher.h"
 #include "graphic.h"
@@ -182,11 +183,11 @@ void _credit_down(uint8_t player_offset) {
 }
 
 void read_calendar(void) {
-    return;
+    _read_calendar();
 }
 
 void setup_calendar(void) {
-    return;
+    _setup_calendar();
 }
 
 void card(void) {

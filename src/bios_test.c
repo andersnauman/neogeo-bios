@@ -1,6 +1,7 @@
 #include "backup_ram.h"
 #include "bios.h"
 #include "bios_calls.h"
+#include "calendar.h"
 #include "graphic.h"
 #include "mess_out.h"
 #include "utils.h"

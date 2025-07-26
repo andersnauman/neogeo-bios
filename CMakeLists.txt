@@ -37,6 +37,7 @@ add_executable(${PROJECT_NAME}.elf
     "src/bios_calls.c"
     "src/bios_test.c"
     "src/bios.c"
+    "src/calendar.c"
     "src/coin.c"
     "src/eyecatcher.c"
     "src/graphic.c"

@@ -72,6 +72,12 @@ void init() {
                 show_io_test();
             } else if (menu == MENU_SOUND_TEST) {
                 show_sound_test();
+            } else if (menu == MENU_MEMORY_CARD) {
+                show_memory_card_test();
+            } else if (menu == MENU_CLEAR_BACKUP) {
+                show_backup_clear();
+            } else if (menu == MENU_SETUP_CALENDAR) {
+                show_setup_calendar();
             }
 
             while ((*BIOS_STATCHANGE_RAW & 0x01) == 0) {
@@ -79,6 +85,10 @@ void init() {
                     update_io_test();
                 } else if (menu == MENU_SOUND_TEST) {
                     update_sound_test();
+                } else if (menu == MENU_MEMORY_CARD) {
+                    update_memory_card_test();
+                } else if (menu == MENU_SETUP_CALENDAR) {
+                    update_setup_calendar();
                 }
                 wait_for_vblank();
             }

@@ -23,22 +23,6 @@ void nop_loop(uint8_t count) {
     }
 }
 
-void write_rtc_command(uint8_t command) {
-    for (uint8_t i = 0; i < 4; i++) {        
-        *WATCHDOG = 0;
-        uint8_t write = command;
-        write &= 0x1;
-        *REG_RTCCTRL = write;
-        write |= 0x2;
-        *REG_RTCCTRL = write;
-        write ^= 0x2;
-        *REG_RTCCTRL = write;
-        command >>= 1;
-    }
-    *REG_RTCCTRL = 0x4;
-    *REG_RTCCTRL = 0x0;
-}
-
 void wait_for_rtc_pulse_edge(uint8_t *prev) {
     // Original code waited for infinity. Limit it to have an honest change to see the error.
     for (uint32_t i = 0; i < 0x20000; i++) {

@@ -159,6 +159,7 @@ Game tells the BIOS where it is:
 #define CARD_ANSWER_WRITE_DISABLED 0x85
 
 // Calendar
+#define BIOS_DATE(n)    ((volatile uint8_t *) (0x10FDD2 + (n)))
 #define BIOS_DATE_PTR   0x10FDD2
 #define BIOS_YEAR       ((volatile uint8_t *) 0x10FDD2)
 #define BIOS_MONTH      ((volatile uint8_t *) 0x10FDD3)
@@ -215,7 +216,7 @@ typedef void (*subr_fn_t)(void);
 #define BIOS_COUNTRY_USA    1
 #define BIOS_COUNTRY_EUROPE 2
 
-#define MAX_NUM_MENUS       4
+#define MAX_NUM_MENUS       7
 #define MENU_CROSSHATCH     0
 #define MENU_COLOR          1
 #define MENU_IO             2
@@ -228,7 +229,6 @@ extern uint8_t menu;
 
 void init();
 void start_game();
-void software_dips();
 void set_default_values();
 
 #endif // _BIOS_H
