@@ -56,7 +56,7 @@ void test_palette_ram() {
     *PALETTE_REFERENCE = 0x8000;
     *PALETTE_BACKGROUND = 0x0000;
 };
-
+/*
 void test_work_ram() {
     // Work RAM ($100000-$10FFFF)
     uint16_t value = 0;
@@ -85,7 +85,7 @@ void test_work_ram() {
         }
     }
 };
-
+*/
 void test_video_ram() {
     *REG_VRAMMOD = 1;
 
@@ -181,6 +181,7 @@ void test_backup_ram() {
             reset_backup_ram();
         }
     }
+    //reset_backup_ram();
 };
 
 void test_memory_card() {

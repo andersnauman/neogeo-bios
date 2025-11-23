@@ -82,5 +82,7 @@ void load_game_data();
 void save_game_data();
 
 uint8_t find_game_data_block();
+uint16_t find_game_data_block_by_name();
+uint16_t find_next_available_data_block();
 
 #endif // _BACKUP_RAM_H

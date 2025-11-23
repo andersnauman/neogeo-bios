@@ -40,6 +40,7 @@ add_executable(${PROJECT_NAME}.elf
     "src/calendar.c"
     "src/coin.c"
     "src/eyecatcher.c"
+    "src/game_menu.c"
     "src/graphic.c"
     "src/how_to_play.c"
     "src/input.c"

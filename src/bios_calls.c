@@ -5,6 +5,7 @@
 #include "calendar.h"
 #include "coin.h"
 #include "eyecatcher.h"
+#include "game_menu.h"
 #include "graphic.h"
 #include "how_to_play.h"
 #include "input.h"
@@ -102,6 +103,10 @@ void system_io(void) {
         }
 
         lock_backup_ram();
+    }
+
+    if (menu_hotkey_pressed()) {
+        menu_toggle();
     }
     
     return;

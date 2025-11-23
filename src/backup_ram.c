@@ -86,7 +86,14 @@ void setup_backup_ram() {
                 *BRAM_FIRST_PLAYABLE_SLOT = slot;
             }
             // TODO: Verify security string 
-            break;
+            /*
+            uint16_t block = find_game_data_block_by_name();
+            if (block == 0xFF) {
+                block = find_next_available_data_block();
+            }
+            // TODO: Show a warning if all blocks are taken or maybe just overwrite one?
+            *BRAM_SLOT_NGH_ID(slot) = (*ROM_NGH_NUMER << 16) | block;
+            */
         }
     }
     *REG_SWPBIOS = 0;    
@@ -110,7 +117,7 @@ void init_game_data() {
     load_game_data();
 
     *REG_SWPROM = 0;
-    *BIOS_SWPMODE = 0x0;
+    *BIOS_SWPMODE = 0;
     *BIOS_USER_REQUEST = 0;
     *BIOS_SYSRET_STATUS = 0;
     // With BIOS_USER_REQUEST = 0 this initialize the default highscore etc
@@ -119,14 +126,13 @@ void init_game_data() {
 }
 
 // Loads game data from workram. Tries to reserve a block if none is assigned yet.
-// Before calling this function, make sure you set REG_SWPROM
 void load_game_data() {
     unlock_backup_ram();
 
-    *REG_SWPROM = 0;
-    *BIOS_SWPMODE = 0x0;
-
     uint8_t block = find_game_data_block();
+
+    *REG_SWPROM = 0;
+    *BIOS_SWPMODE = 0;
 
     // If we did not find an already reserved block, take the next available and fill it with data
     if (0xFF == block) {
@@ -197,7 +203,7 @@ void load_game_data() {
     // Load dip settings
     for (uint8_t i = 0; i < 16; i++) {
         BIOS_GAME_DIP[i] = BRAM_GAME_DIP_SETTINGS(block)[i];
-    }    
+    }
 
     *REG_SWPBIOS = 0;
     *BIOS_SWPMODE = 0xFF;
@@ -210,14 +216,14 @@ void load_game_data() {
 void save_game_data() {
     unlock_backup_ram();
 
-    *REG_SWPROM = 0;
-    *BIOS_SWPMODE = 0x00;
-
     uint8_t block = find_game_data_block();
 
     if (0xFF == block) {
         return;
     }
+
+    *REG_SWPROM = 0;
+    *BIOS_SWPMODE = 0;
 
     // Copy game data into backup
     volatile uint8_t *bram_game_data = BRAM_GAME_BLOCK(block);
@@ -239,10 +245,53 @@ void save_game_data() {
 }
 
 uint8_t find_game_data_block() {
+    *REG_SWPROM = 0;
+    *BIOS_SWPMODE = 0x00;    
     uint8_t block = 0xFF;
     for (uint8_t i = 0; i < 8; i++) {
         uint16_t bram_ngh_id = (uint16_t) ((*BRAM_SLOT_NGH_ID(i) & 0xFFFF0000) >> 16);
         if (bram_ngh_id == *ROM_NGH_NUMER) {
+            block = i;
+            break;
+        }
+    }
+    *REG_SWPBIOS = 0;
+    *BIOS_SWPMODE = 0xFF;    
+    return block;
+}
+
+uint16_t find_game_data_block_by_name() {
+    uint16_t block = 0xFF;
+    for (uint8_t i = 0; i < 8; i++) {
+        uint8_t region = *SROM_COUNTRY_CODE;
+        uint32_t dips_addr = ROM_SOFTDIP_TABLE[region];
+        volatile uint8_t *cartridge_game_name = (volatile uint8_t *)(uint32_t)dips_addr;
+
+        volatile uint8_t *block_game_name = BRAM_GAME_NAME(i);
+        uint8_t match = 1;
+        for (uint8_t c = 0; c < 0x10; c++) {
+            if (cartridge_game_name[c] != block_game_name[c]) {
+                match = 0;
+            }
+        }
+        if (match == 1) {
+            block = i;
+            break;
+        }
+    }
+    return block;
+}
+
+uint16_t find_next_available_data_block() {
+    uint16_t block = 0xFF;
+    for (uint8_t i = 0; i < 8; i++) {
+        uint8_t available = 1;
+        for (uint8_t c = 0; c < 0x10; c++) {
+            if (BRAM_GAME_NAME(i)[c] != 0x00) {
+                available = 0;
+            }
+        }
+        if (available == 1) {
             block = i;
             break;
         }

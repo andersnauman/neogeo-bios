@@ -12,13 +12,13 @@
 
 uint8_t menu = MENU_CROSSHATCH;
 
-void init() {
+__attribute__((used, section(".text._start")))
+void _start() {
     __asm__ volatile ("move #0x2700, %sr");  // Disable interrupts
     *WATCHDOG = 0;
     *IRQ_ACK = 0x07;
     *LSPCMODE = 0x4000;
 
-    *BIOS_SWPMODE = 0xFF;
     *REG_BRDFIX = 0;
     *REG_SWPBIOS = 0;
     *REG_RESETCL1 = 0;
@@ -29,6 +29,8 @@ void init() {
     test_backup_ram();
     test_palette_ram();
     test_video_ram();
+
+    *BIOS_SWPMODE = 0xFF;
 
     uint8_t request_reset_backup = 0;
     while (0 == *REG_DIPSW) {
@@ -61,6 +63,15 @@ void init() {
     *IRQ_ACK = 0x07;                            // Ack all interrupts
     __asm__ volatile ("move #0x2000, %sr");     // Set interrupt mask to level 2
 
+    uint8_t service_button = ((~(*REG_STATUS_A)) & 0x4) >> 2;
+    uint8_t dipsw_settings = (~(*REG_DIPSW)) & 0x1;
+    if (service_button || dipsw_settings) {
+        //show_bios_menu();
+        show_bios_menu_hard_dips();
+        //show_bios_menu_soft_dips();
+        //show_bios_menu_game_soft_dips();
+    }
+
     // If no game was found (could not read NGH-number), show test-menu
     if (*BRAM_FIRST_PLAYABLE_SLOT == 0xFF) {
         while(1) {
@@ -80,13 +91,15 @@ void init() {
                 show_setup_calendar();
             }
 
-            while ((*BIOS_STATCHANGE_RAW & 0x01) == 0) {
+            while (((*BIOS_STATCHANGE_RAW) & 0x01) == 0) {
                 if (menu == MENU_IO) {
                     update_io_test();
                 } else if (menu == MENU_SOUND_TEST) {
                     update_sound_test();
                 } else if (menu == MENU_MEMORY_CARD) {
                     update_memory_card_test();
+                } else if (menu == MENU_CLEAR_BACKUP) {
+                    update_backup_clear();
                 } else if (menu == MENU_SETUP_CALENDAR) {
                     update_setup_calendar();
                 }
@@ -104,6 +117,7 @@ void init() {
     }  
 
     *REG_SLOT = *BRAM_FIRST_PLAYABLE_SLOT;
+
     if (0xFF == find_game_data_block()) {
         init_game_data();
     } else {

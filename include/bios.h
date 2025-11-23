@@ -5,7 +5,7 @@
 
 #define GAME_ENTRY       ((volatile uint16_t *) 0x100000)
 #define WATCHDOG         ((volatile uint8_t *)  0x300001)
-#define REG_DIPSW        ((volatile uint8_t *)  0x300001)
+#define REG_DIPSW        ((volatile uint8_t *)  0x300001) // Hardware dips are active Low
 #define LSPCMODE         ((volatile uint16_t *) 0x3C0006)
 #define IRQ_ACK          ((volatile uint8_t *)  0x3C000C)
 
@@ -173,23 +173,25 @@ Game tells the BIOS where it is:
 #define BIOS_COMPULSION_TIMER       ((volatile uint8_t *) 0x10FDDA)
 #define BIOS_COMPULSION_FRAME_TIMER ((volatile uint8_t *) 0x10FDDB)
 
-#define BIOS_DEV_MODE           ((volatile uint64_t *) 0x10FE80)
-#define BIOS_FRAME_COUNTER      ((volatile uint32_t *) 0x10FE88)
-#define BIOS_FRAME_COUNTER_LOW  ((volatile uint8_t *)  0x10FE8B)
-#define BIOS_VBLANK_CLEAR       ((volatile uint8_t *)  0x10FE8C)
-#define BIOS_SWPMODE            ((volatile uint8_t *)  0x10FE8D)  // REG_SWPBIOS (0xFF) vs REG_SWPROM (0x00)
-#define BIOS_BRAM_USED          ((volatile uint8_t *)  0x10FEBF)  // 0:Backup RAM not currently used, 1:Currently used
-#define BIOS_Z80_BUSY           ((volatile uint8_t *)  0x10FEDB)  // 1 = busy
-#define BIOS_NEXT_GAME_ROTATE   ((volatile uint8_t *)  0x10FEE0)
-#define BIOS_FRAME_SKIP         ((volatile uint8_t *)  0x10FEE1)
-#define BIOS_INT1_SKIP          ((volatile uint8_t *)  0x10FEE3)
-#define BIOS_INT1_FRAME_COUNTER ((volatile uint8_t *)  0x10FEE4)
-#define BIOS_STATCURRENT_RAW    ((volatile uint8_t *)  0x10FEDC)
-#define BIOS_STATCHANGE_RAW     ((volatile uint8_t *)  0x10FEDD)
+#define BIOS_DEV_MODE            ((volatile uint64_t *) 0x10FE80)
+#define BIOS_FRAME_COUNTER       ((volatile uint32_t *) 0x10FE88)
+#define BIOS_FRAME_COUNTER_LOW   ((volatile uint8_t *)  0x10FE8B)
+#define BIOS_VBLANK_CLEAR        ((volatile uint8_t *)  0x10FE8C)
+#define BIOS_SWPMODE             ((volatile uint8_t *)  0x10FE8D)  // REG_SWPBIOS (0xFF) vs REG_SWPROM (0x00)
+
+#define BIOS_BRAM_USED           ((volatile uint8_t *)  0x10FEBF)  // 0:Backup RAM not currently used, 1:Currently used
+#define BIOS_Z80_BUSY            ((volatile uint8_t *)  0x10FEDB)  // 1 = busy
+#define BIOS_STATCURRENT_RAW     ((volatile uint8_t *)  0x10FEDC)
+#define BIOS_STATCHANGE_RAW      ((volatile uint8_t *)  0x10FEDD)
+#define BIOS_NEXT_GAME_ROTATE    ((volatile uint8_t *)  0x10FEE0)
+#define BIOS_FRAME_SKIP          ((volatile uint8_t *)  0x10FEE1)
+#define BIOS_INT1_SKIP           ((volatile uint8_t *)  0x10FEE3)
+#define BIOS_INT1_FRAME_COUNTER  ((volatile uint8_t *)  0x10FEE4)
+
 
 // SYSTEM registers
-#define SROM_MVS_FLAG     ((volatile uint8_t *) 0xC00400)   // 0=AES, 0x80=MVS
-#define SROM_COUNTRY_CODE ((volatile uint8_t *) 0xC00401)   // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
+#define SROM_MVS_FLAG            ((volatile uint8_t *) 0xC00400)   // 0=AES, 0x80=MVS
+#define SROM_COUNTRY_CODE        ((volatile uint8_t *) 0xC00401)   // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
 
 // ROM registers
 #define ROM_NGH_NUMER            ((volatile uint16_t *) 0x000108)   // The game's identifying number, used for memory card saves and MVS bookkeeping.
@@ -205,17 +207,18 @@ Game tells the BIOS where it is:
 #define ROM_SECURITY_CODE        (*(volatile uint32_t *) 0x000182)
 #define ROM_SECURITY_CODE_PTR    ((volatile char (*)[188]) (uintptr_t) ROM_SECURITY_CODE)
 
-/* Jump rutines: */
+// Jump rutines
 typedef void (*subr_fn_t)(void);
-#define SUBR_CART_USER         ((subr_fn_t)0x000122)    // USER = 0x000122
-#define SUBR_CART_PLAYER_START ((subr_fn_t)0x000128)    // PLAYER_START = 0x000128
-#define SUBR_CART_DEMO_END     ((subr_fn_t)0x00012E)    // DEMO_END = 0x00012E
-#define SUBR_CART_COIN_SOUND   ((subr_fn_t)0x000134)    // COIN_SOUND = 0x000134
+#define SUBR_CART_USER           ((subr_fn_t)0x000122)    // USER = 0x000122
+#define SUBR_CART_PLAYER_START   ((subr_fn_t)0x000128)    // PLAYER_START = 0x000128
+#define SUBR_CART_DEMO_END       ((subr_fn_t)0x00012E)    // DEMO_END = 0x00012E
+#define SUBR_CART_COIN_SOUND     ((subr_fn_t)0x000134)    // COIN_SOUND = 0x000134
 
 #define BIOS_COUNTRY_JAPAN  0
 #define BIOS_COUNTRY_USA    1
 #define BIOS_COUNTRY_EUROPE 2
 
+// Test menu values
 #define MAX_NUM_MENUS       7
 #define MENU_CROSSHATCH     0
 #define MENU_COLOR          1
@@ -224,6 +227,17 @@ typedef void (*subr_fn_t)(void);
 #define MENU_MEMORY_CARD    4
 #define MENU_CLEAR_BACKUP   5
 #define MENU_SETUP_CALENDAR 6
+
+// In-game menu values
+#define BIOS_GAME_MENU_START_POSITION   0x710a
+#define BIOS_GAME_MENU_ROW_SIZE         12
+#define BIOS_GAME_MENU_COLUMN_SIZE      24
+#define BIOS_GAME_MENU_SPRITE_BACKUP    ((volatile uint16_t *) 0x10FA00)
+#define BIOS_GAME_MENU                  ((volatile uint8_t *)  0x10FE90) // 0 = Closed/Hidden, 1 = Open/Visable
+#define BIOS_GAME_MENU_TOGGLE           ((volatile uint8_t *)  0x10FE92)
+#define BIOS_GAME_LSPCMODE              ((volatile uint16_t *) 0x10FE94)
+#define BIOS_GAME_PALETTE_1             ((volatile uint32_t *) 0x10FE98)
+//#define BIOS_GAME_PALETTE_2             ((volatile uint16_t *) 0x10FE94)
 
 extern uint8_t menu;
 

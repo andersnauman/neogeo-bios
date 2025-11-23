@@ -19,12 +19,49 @@ void test_led();
 void test_memory_card();
 void test_palette_ram();
 void test_video_ram();
-void test_work_ram();
+//void test_work_ram();
 void test_sound();
 void test_rtc();
 
 void print_error_msg(uint8_t type, uint32_t memory_location, uint16_t expected, uint16_t actual);
 void _convert_hex_to_fix_ascii(uint8_t input, uint8_t *output_hi, uint8_t *output_lo);
+
+#include "bios.h"
+
+// Only in header because of the static inline.
+// Requirement to be able to write over the stack
+static inline void test_work_ram() {
+    // Work RAM ($100000-$10FFFF)
+    uint16_t value = 0;
+    uint16_t offset = 0;
+    for (uint32_t i = 0; i < 0x10000; i += 2) {
+        *WATCHDOG = 0;
+        if (i > 0) {
+            offset = i / 2;
+        }
+        value = WORK_RAM[offset];
+        // Test all odd-bits
+        WORK_RAM[offset] = 0x5555;
+        if (WORK_RAM[offset] != 0x5555) {
+            print_error_msg(BIOS_ERROR_WORK_RAM, 0x100000 + i, 0x5555, WORK_RAM[offset]);
+        }
+        // Test all even-bits
+        WORK_RAM[offset] = 0xAAAA;
+        if (WORK_RAM[offset] != 0xAAAA) {
+            print_error_msg(BIOS_ERROR_WORK_RAM, 0x100000 + i, 0xAAAA, WORK_RAM[offset]);
+        }
+        // TODO: This is ugly. Make it more precise and use SP save + jmp as the original code did!
+        WORK_RAM[offset] = 0x0000;
+        /*
+        if ((i < 0xF250) || (i >= 0xF300)) {
+            WORK_RAM[offset] = 0x0000;
+        } else {
+            WORK_RAM[offset] = value;
+        }
+        */
+    }
+    __asm__ volatile ("move.l #0x10F300, %sp");
+};
 
 static const char _backup_ram_str[] = "NEO-GEO ";
 static const char _memory_card_str[] = "SNK ROM ";
