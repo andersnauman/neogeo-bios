@@ -192,16 +192,16 @@ Game tells the BIOS where it is:
 
 #define BIOS_BRAM_USED           ((volatile uint8_t *)  0x10FEBF)  // 0:Backup RAM not currently used, 1:Currently used
 #define BIOS_Z80_BUSY            ((volatile uint8_t *)  0x10FEDB)  // 1 = busy
-#define BIOS_STATCURRENT_RAW     ((volatile uint8_t *)  0x10FEDC)
-#define BIOS_STATCHANGE_RAW      ((volatile uint8_t *)  0x10FEDD)
+#define BIOS_STATCURRENT_RAW     ((volatile uint8_t *)  0x10FEDC)  // Select P4, Start P4, Select P3, Start P3, Select P2, Start P2, Select P1, Start P1 (positive logic)
+#define BIOS_STATCHANGE_RAW      ((volatile uint8_t *)  0x10FEDD)  // Select P4, Start P4, Select P3, Start P3, Select P2, Start P2, Select P1, Start P1 (positive logic)
 #define BIOS_NEXT_GAME_ROTATE    ((volatile uint8_t *)  0x10FEE0)
 #define BIOS_FRAME_SKIP          ((volatile uint8_t *)  0x10FEE1)
 #define BIOS_INT1_SKIP           ((volatile uint8_t *)  0x10FEE3)
 #define BIOS_INT1_FRAME_COUNTER  ((volatile uint8_t *)  0x10FEE4)
 
 // SYSTEM registers
-#define SROM_MVS_FLAG            ((volatile uint8_t *) 0xC00400)   // 0=AES, 0x80=MVS
-#define SROM_COUNTRY_CODE        ((volatile uint8_t *) 0xC00401)   // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
+#define SROM_MVS_FLAG            ((volatile uint8_t *)  0xC00400)   // 0=AES, 0x80=MVS
+#define SROM_COUNTRY_CODE        ((volatile uint8_t *)  0xC00401)   // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
 
 // ROM registers
 #define ROM_NGH_NUMBER           ((volatile uint16_t *) 0x000108)   // The game's identifying number, used for memory card saves and MVS bookkeeping.
@@ -219,10 +219,10 @@ Game tells the BIOS where it is:
 
 // Jump rutines
 typedef void (*subr_fn_t)(void);
-#define SUBR_CART_USER           ((subr_fn_t)0x000122)    // USER = 0x000122
-#define SUBR_CART_PLAYER_START   ((subr_fn_t)0x000128)    // PLAYER_START = 0x000128
-#define SUBR_CART_DEMO_END       ((subr_fn_t)0x00012E)    // DEMO_END = 0x00012E
-#define SUBR_CART_COIN_SOUND     ((subr_fn_t)0x000134)    // COIN_SOUND = 0x000134
+#define SUBR_CART_USER           ((subr_fn_t)0x000122)    // This sub-function is expected to call system_return() instead of returning
+#define SUBR_CART_PLAYER_START   ((subr_fn_t)0x000128)    // This sub-function is expected to return(RTS) as normal
+#define SUBR_CART_DEMO_END       ((subr_fn_t)0x00012E)    // This sub-function is expected to return(RTS) as normal
+#define SUBR_CART_COIN_SOUND     ((subr_fn_t)0x000134)    // This sub-function is expected to return(RTS) as normal
 
 #define BIOS_COUNTRY_JAPAN  0
 #define BIOS_COUNTRY_USA    1
@@ -238,8 +238,6 @@ typedef void (*subr_fn_t)(void);
 #define BIOS_GAME_LSPCMODE              ((volatile uint16_t *) 0x10FE94)
 #define BIOS_GAME_PALETTE_1             ((volatile uint32_t *) 0x10FE98)
 //#define BIOS_GAME_PALETTE_2             ((volatile uint16_t *) 0x10FE94)
-
-extern uint8_t menu;
 
 void start_game();
 void set_default_values();

@@ -1,5 +1,6 @@
 #include "backup_ram.h"
 #include "bios.h"
+#include "bios_calls.h"
 #include "utils.h"
 
 #include "coin.h"
@@ -58,15 +59,14 @@ void update_coin() {
             *BIOS_COMPULSION_FRAME_TIMER = 59;   
         }
 
-        // Play sound if we have a active game
+        // Only play sound if we have an active game
         // TODO: Create a sound that isnt depended on a game being active?
         if (0x00 == *BIOS_SWPMODE) {
             SUBR_CART_COIN_SOUND();
-
             if (0x03 != *BIOS_USER_REQUEST) {
                 *BIOS_USER_REQUEST = 0x03;
                 SUBR_CART_DEMO_END();
-                start_game();
+                system_return();
             }            
         }
     }

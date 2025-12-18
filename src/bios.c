@@ -12,8 +12,6 @@
 
 #include "bios.h"
 
-uint8_t menu = MENU_CROSSHATCH;
-
 __attribute__((used, section(".text._start")))
 void _start() {
     __asm__ volatile ("move #0x2700, %sr");  // Disable interrupts

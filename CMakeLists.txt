@@ -11,7 +11,7 @@ set(CMAKE_SYSTEM_PROCESSOR m68k)
 
 # Set target tools
 set(CMAKE_C_COMPILER m68k-linux-gnu-gcc)
-set(CMAKE_C_FLAGS "-m68000 -O2 -fstack-usage -Wl,--gc-sections -ffunction-sections -fdata-sections -Wl,-Map,bios.map")
+set(CMAKE_C_FLAGS "-m68000 -O2 -fstack-usage -ffreestanding -fno-builtin -Wl,--gc-sections -ffunction-sections -fdata-sections -Wl,-Map,bios.map")
 
 set(CMAKE_ASM_COMPILER m68k-linux-gnu-gcc)
 set(CMAKE_ASM_FLAGS "-m68000 -x assembler-with-cpp")
@@ -49,6 +49,8 @@ add_executable(${PROJECT_NAME}.elf
     "src/main.c"
     "src/mess_out.c"
     "src/service.c"
+    "src/service_dips.c"
+    "src/service_hardware.c"
     "src/utils.c"
     "src/vectors.c"
 )

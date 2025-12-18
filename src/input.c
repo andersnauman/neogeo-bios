@@ -6,8 +6,6 @@
 
 #include "input.h"
 
-uint8_t is_pressed = 0;
-
 void update_controller_input() {
     /*
         $10FD94	BIOS_P1STATUS	byte	BIOS	0:No connection, 1:Normal joypad, 2:Expanded joypad, 3:Mahjong controller, 4:Keyboard
@@ -108,6 +106,7 @@ void check_start_button() {
 }
 
 void check_change_game() {
+    // Fail-safe to not over rotate
     if (0 != *BIOS_NEXT_GAME_ROTATE) {
         return;
     }
