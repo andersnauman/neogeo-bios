@@ -48,7 +48,7 @@
 #define REG_SRAMLOCK     ((volatile uint8_t *) 0x3A000D)  // Write-protects backup RAM (MVS)
 #define REG_SRAMUNLOCK   ((volatile uint8_t *) 0x3A001D)  // Unprotects backup RAM (MVS)
 
-#define BACKUP_RAM_LOCK  ((volatile uint8_t *) 0x3A000D)
+#define BACKUP_RAM_LOCK   ((volatile uint8_t *) 0x3A000D)
 #define BACKUP_RAM_UNLOCK ((volatile uint8_t *) 0x3A001D)
 
 #define REG_PALBANK1     ((volatile uint8_t *) 0x3A000F)  // Use palette bank 1
@@ -66,13 +66,24 @@
 
 #define BIOS_CURRENT_SLOT_LED   ((volatile uint8_t *) 0x10FCEC)
 
-#define BIOS_NGH_NUMBERS     ((volatile uint8_t *) 0x10FD00)    // NGH-numbers saved by original bios
+// Temporary storage for NGH during boot
+#define BIOS_NGH_BLOCK              ((volatile SlotEntry*) 0x10FD00)
+#define BIOS_SLOT_BOOKKEEP_DATE(n)  ((volatile uint32_t*) (0x10FD20 + ((n) * 4)))      // n=0‑7, YYMMDDdd 
+#define MAX_SLOTS                   8
 
 #define BIOS_SYSTEM_MODE     ((volatile uint8_t *) 0x10FD80)    // 0:BIOS wants vblank (system mode), 0x80:Ok to use vblank (game mode)
+/*
+Status code for the system_return function.
+0 = Initialize the game
+3 = Game over
+4 = Next slot, incremental
+5 = Next slot, decremental
+*/
 #define BIOS_SYSRET_STATUS   ((volatile uint8_t *) 0x10FD81)
 #define BIOS_MVS_FLAG        ((volatile uint8_t *) 0x10FD82)    // 0:AES, 1:MVS
 #define BIOS_COUNTRY_CODE    ((volatile uint8_t *) 0x10FD83)    // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
 #define BIOS_GAME_DIP        ((volatile uint8_t *) 0x10FD84)
+#define BIOS_GAME_DIP_PTR    0x10FD84
 #define BIOS_PLAYER_MOD1     ((volatile uint8_t *) 0x10FDB6)
 #define BIOS_PLAYER_MOD2     ((volatile uint8_t *) 0x10FDB7)
 #define BIOS_PLAYER_MOD3     ((volatile uint8_t *) 0x10FDB8)
@@ -188,13 +199,12 @@ Game tells the BIOS where it is:
 #define BIOS_INT1_SKIP           ((volatile uint8_t *)  0x10FEE3)
 #define BIOS_INT1_FRAME_COUNTER  ((volatile uint8_t *)  0x10FEE4)
 
-
 // SYSTEM registers
 #define SROM_MVS_FLAG            ((volatile uint8_t *) 0xC00400)   // 0=AES, 0x80=MVS
 #define SROM_COUNTRY_CODE        ((volatile uint8_t *) 0xC00401)   // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
 
 // ROM registers
-#define ROM_NGH_NUMER            ((volatile uint16_t *) 0x000108)   // The game's identifying number, used for memory card saves and MVS bookkeeping.
+#define ROM_NGH_NUMBER           ((volatile uint16_t *) 0x000108)   // The game's identifying number, used for memory card saves and MVS bookkeeping.
 #define ROM_PROGRAM_SIZE         ((volatile uint32_t *) 0x00010A)   // The size of the program (in bytes).
 #define ROM_BACKUP_RAM_PTR       ((volatile uint32_t *) 0x00010E)   // Points to a location in user RAM, used on MVS for saving backup data. (The first two bytes are used for debug dipswitches.
 #define ROM_GAME_SAVE_SIZE       ((volatile uint16_t *) 0x000112)   // Size of the game's save size (in bytes).
@@ -218,16 +228,6 @@ typedef void (*subr_fn_t)(void);
 #define BIOS_COUNTRY_USA    1
 #define BIOS_COUNTRY_EUROPE 2
 
-// Test menu values
-#define MAX_NUM_MENUS       7
-#define MENU_CROSSHATCH     0
-#define MENU_COLOR          1
-#define MENU_IO             2
-#define MENU_SOUND_TEST     3
-#define MENU_MEMORY_CARD    4
-#define MENU_CLEAR_BACKUP   5
-#define MENU_SETUP_CALENDAR 6
-
 // In-game menu values
 #define BIOS_GAME_MENU_START_POSITION   0x710a
 #define BIOS_GAME_MENU_ROW_SIZE         12
@@ -241,8 +241,9 @@ typedef void (*subr_fn_t)(void);
 
 extern uint8_t menu;
 
-void init();
 void start_game();
 void set_default_values();
+void change_slot_incremental();
+void change_slot_decremental();
 
 #endif // _BIOS_H

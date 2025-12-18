@@ -2,6 +2,7 @@
 #define _UTILS_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 uint8_t to_bcd8(uint8_t v);
 uint8_t from_bcd8(uint8_t b);
@@ -12,5 +13,8 @@ void wait_for_z80();
 void reset_palettes();
 void reset_fix_layer();
 void reset_sprites();
+void reset_system();
+void *memset(void *ptr, int value, size_t num);
+void *memcpy(void *dest, const void *src, size_t num);
 
 #endif // _UTILS_H

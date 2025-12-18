@@ -69,7 +69,7 @@ void menu_update() {
     *address = 0x0007;
     address++;
 
-    uint8_t block = find_game_data_block();
+    uint8_t block = find_game_data_block(*ROM_NGH_NUMBER);
 
     for (uint8_t i = 0; i < 16; i++) {
         *(volatile uint8_t *)address = BRAM_GAME_NAME(block)[i];

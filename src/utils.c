@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "bios.h"
 
 #include "utils.h"
@@ -134,4 +135,33 @@ void reset_sprites() {
         *WATCHDOG = 0;
         *REG_VRAMRW = (uint16_t)0xBE00;
     }    
+}
+
+void reset_system() {
+    __asm__ volatile ("move.l #0x10F300, %sp");
+    __asm__ volatile ("jmp 0x00c00500.l");
+}
+
+void *memset(void *ptr, int value, size_t num) {
+    unsigned char *p = (unsigned char *)ptr;
+    unsigned char v = (unsigned char)value;
+
+    while (num--) {
+        *WATCHDOG = 0;
+        *p++ = v;
+    }
+
+    return ptr;
+}
+
+void *memcpy(void *dest, const void *src, size_t num) {
+    unsigned char       *d = (unsigned char *)dest;
+    const unsigned char *s = (const unsigned char *)src;
+
+    while (num--) {
+        *WATCHDOG = 0;
+        *d++ = *s++;
+    }
+
+    return dest;
 }

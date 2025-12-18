@@ -6,6 +6,8 @@
 #include "how_to_play.h"
 #include "mess_out.h"
 #include "service.h"
+#include "service_dips.h"
+#include "service_hardware.h"
 #include "utils.h"
 
 #include "bios.h"
@@ -43,7 +45,6 @@ void _start() {
     }
 
     test_rtc();
-
     test_bios_checksum();   
     test_sound();
     test_memory_card();
@@ -63,68 +64,20 @@ void _start() {
     *IRQ_ACK = 0x07;                            // Ack all interrupts
     __asm__ volatile ("move #0x2000, %sr");     // Set interrupt mask to level 2
 
-    uint8_t service_button = ((~(*REG_STATUS_A)) & 0x4) >> 2;
-    uint8_t dipsw_settings = (~(*REG_DIPSW)) & 0x1;
-    if (service_button || dipsw_settings) {
-        //show_bios_menu();
-        show_bios_menu_hard_dips();
-        //show_bios_menu_soft_dips();
-        //show_bios_menu_game_soft_dips();
+    *BIOS_SYSRET_STATUS = 0;
+    unlock_backup_ram();    
+    *BRAM_SLOT_CURSOR = 8;
+    if (0xFF != *BRAM_FIRST_PLAYABLE_SLOT) {
+        *BRAM_SLOT_CURSOR = *BRAM_FIRST_PLAYABLE_SLOT;
+        *REG_SLOT = *BRAM_FIRST_PLAYABLE_SLOT;
+        *REG_SWPROM = 0;
+        *BIOS_SWPMODE = 0;        
+        *BIOS_USER_REQUEST = 0;                 // 0 = Initialize the default highscore etc   
+        lock_backup_ram();
+        SUBR_CART_USER();
     }
-
-    // If no game was found (could not read NGH-number), show test-menu
-    if (*BRAM_FIRST_PLAYABLE_SLOT == 0xFF) {
-        while(1) {
-            if (menu == MENU_CROSSHATCH) {
-                show_crosshatch_test();
-            } else if (menu == MENU_COLOR) {
-                show_color_test();
-            } else if (menu == MENU_IO) {
-                show_io_test();
-            } else if (menu == MENU_SOUND_TEST) {
-                show_sound_test();
-            } else if (menu == MENU_MEMORY_CARD) {
-                show_memory_card_test();
-            } else if (menu == MENU_CLEAR_BACKUP) {
-                show_backup_clear();
-            } else if (menu == MENU_SETUP_CALENDAR) {
-                show_setup_calendar();
-            }
-
-            while (((*BIOS_STATCHANGE_RAW) & 0x01) == 0) {
-                if (menu == MENU_IO) {
-                    update_io_test();
-                } else if (menu == MENU_SOUND_TEST) {
-                    update_sound_test();
-                } else if (menu == MENU_MEMORY_CARD) {
-                    update_memory_card_test();
-                } else if (menu == MENU_CLEAR_BACKUP) {
-                    update_backup_clear();
-                } else if (menu == MENU_SETUP_CALENDAR) {
-                    update_setup_calendar();
-                }
-                wait_for_vblank();
-            }
-
-            menu = menu + 1;
-            if (menu >= MAX_NUM_MENUS) {
-                menu = MENU_CROSSHATCH;
-            }
-            wait_for_vblank();
-            reset_fix_layer();
-            reset_palettes();
-        }
-    }  
-
-    *REG_SLOT = *BRAM_FIRST_PLAYABLE_SLOT;
-
-    if (0xFF == find_game_data_block()) {
-        init_game_data();
-    } else {
-        load_game_data();
-        *BIOS_SYSRET_STATUS = 0;
-        system_return();
-    }
+    lock_backup_ram();
+    system_return();
 };
 
 void start_game() {
@@ -154,4 +107,32 @@ void start_game() {
 
 void set_default_values() {
     *BIOS_INT1_SKIP = 0;        // Only used to skip input when checking for RTC-pulse with interrupts enabled?
+}
+
+void change_slot_incremental() {
+    uint8_t slot = (*BRAM_SLOT_SELECTED + 1) & (BRAM_MAX_SLOTS - 1);
+    for (int i = 0; i < BRAM_MAX_SLOTS; i++) {
+        if (BRAM_NGH_BLOCK[slot].ngh != 0x0000) {
+            *REG_SLOT = slot;
+            unlock_backup_ram();
+            *BRAM_SLOT_SELECTED = slot;
+            lock_backup_ram();
+            return;
+        }
+        slot = (slot + 1) & (BRAM_MAX_SLOTS - 1);
+    }
+}
+
+void change_slot_decremental() {
+    uint8_t slot = (*BRAM_SLOT_SELECTED - 1) & (BRAM_MAX_SLOTS - 1);
+    for (int i = 0; i < BRAM_MAX_SLOTS; i++) {
+        if (BRAM_NGH_BLOCK[slot].ngh != 0x0000) {
+            *REG_SLOT = slot;
+            unlock_backup_ram();
+            *BRAM_SLOT_SELECTED = slot;
+            lock_backup_ram();
+            return;
+        }
+        slot = (slot - 1) & (BRAM_MAX_SLOTS - 1);
+    }
 }

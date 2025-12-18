@@ -14,6 +14,7 @@ extern uint8_t is_pressed;
 
 void update_controller_input();
 void check_start_button();
+void check_change_game();
 void check_compulsion_timer();
 
 #endif // _INPUT_H

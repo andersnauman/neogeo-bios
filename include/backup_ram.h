@@ -25,7 +25,7 @@
 #define BRAM_DIP_0x40              ((volatile uint8_t *)0xD00040)  // Mystery 0x40
 #define BRAM_DIP_0x41              ((volatile uint8_t *)0xD00041)  // Mystery 0x41
 #define BRAM_DIP_GAME_SELECT_FREE  ((volatile uint8_t *)0xD00042)  // 1=Free select, 0=credit req. 
-#define BRAM_DIP_GAME_START_FORCE  ((volatile uint8_t *)0xD00043)  // 0=force, 1=disable
+#define BRAM_DIP_GAME_START_FORCE  ((volatile uint8_t *)0xD00043)  // 0=force, 1=disable.
 #define BRAM_DIP_GAME_START_TIME   ((volatile uint8_t *)0xD00044)  // max secs (BCD) between coin & start
 #define BRAM_DIP_0x45              ((volatile uint8_t *)0xD00045)  // Mystery 0x45
 #define BRAM_DIP_DEMO_SOUND        ((volatile uint8_t *)0xD00046)  // 1 = mute demo
@@ -42,27 +42,53 @@
 #define BRAM_CLOCK_MINUTES         ((volatile uint8_t *)0xD0005C)  // MM 
 #define BRAM_CLOCK_HOURS_X4        ((volatile uint8_t *)0xD0005D)  // HH ×4 
 // 0xD0005E - 0xD00103 : Unknown
-#define BRAM_DATE_PTR              0xD00104
-#define BRAM_DATE_DAYOFWEEK        ((volatile uint8_t *)0xD00104)  // dd (0=Sun) 
-#define BRAM_DATE_DAY              ((volatile uint8_t *)0xD00105)  // DD 
-#define BRAM_DATE_MONTH            ((volatile uint8_t *)0xD00106)  // MM 
-#define BRAM_DATE_YEAR             ((volatile uint8_t *)0xD00107)  // YY 
-#define BRAM_SLOT_SELECTED         ((volatile uint8_t *)0xD00108)  // 0‑N 
-#define BRAM_EL_PANEL_STATE        ((volatile uint8_t *)0xD00109)
+#define BRAM_DATE_PTR              0xD00104                        // YYMMDDdd
+#define BRAM_DATE_YEAR             ((volatile uint8_t *)0xD00104)  // YY 
+#define BRAM_DATE_MONTH            ((volatile uint8_t *)0xD00105)  // MM 
+#define BRAM_DATE_DAY              ((volatile uint8_t *)0xD00106)  // DD 
+#define BRAM_DATE_DAYOFWEEK        ((volatile uint8_t *)0xD00107)  // dd (0=Sun) 
+#define BRAM_SLOT_SELECTED         ((volatile uint8_t *)0xD00108)  // 0‑7 
+#define BRAM_SLOT_CURSOR           ((volatile uint8_t *)0xD00109)  // 0-7
+#define BRAM_MAGIC_0x23            ((volatile uint16_t*)0xD00122)  // ??
 
-#define BRAM_MAGIC_0x23            ((volatile uint16_t*)0xD00122)
+#define BRAM_MAX_SLOTS             8
 
 // 0xD00124–0xD00143 : NGH + game‑block IDs per slot
-#define BRAM_SLOT_NGH_ID(n)        ((volatile uint32_t*)(0xD00124 + ((n) * 4)))      // n=0‑7
+typedef struct {
+    uint16_t ngh;     // NGH number (game ID)
+    uint16_t block;   // Block for saved game data
+} SlotEntry;
+#define BRAM_NGH_BLOCK             ((volatile SlotEntry*) 0xD00124)
+
 // 0xD00144–0xD00163 : book creation time per slot
-#define BRAM_SLOT_BOOKKEEP_DATE(n) ((volatile uint32_t*)(0xD00144 + ((n) * 4)))      // n=0‑7, YYMMDDdd 
+#define BRAM_SLOT_BOOKKEEP_DATE(n) ((volatile uint32_t*) (0xD00144 + ((n) * 4)))      // n=0‑7, YYMMDDdd 
+
+// 0xD00164-0xD001A3 : backup of books of orphan games
+typedef struct {
+    uint16_t ngh;
+    uint16_t block;
+    uint32_t created;   // YYMMDDdd
+} OrphanBookEntry;
+#define ORPHAN_BOOKS                ((volatile OrphanBookEntry*) 0xD00164)
+
 // 0xD00220-0xD0029F : per‑block game soft dip (16 byte each)
-#define BRAM_GAME_DIP_SETTINGS(n)  ((volatile uint8_t *)(0xD00220 + ((n) * 0x10)))   // n=0-7
+/*
+    Metal Slug default dipsw
+
+    12 38 04 12 12 02 01 04 03 00
+    continue        12      off/on*
+    difficulty      38      1,2,3,4*,5,6,7,8
+    play time       04      60*,70,80,90
+    demo sound      12      off,on*
+    play manual     12      off,on*
+    blood           02      off*,on
+*/
+#define BRAM_GAME_DIP_SETTINGS(n)   ((volatile uint8_t *)(0xD00220 + ((n) * 0x10)))   // n=0-7
 // 0xD002A0–0xD0031F : per‑block game names (16 byte each)
-#define BRAM_GAME_NAME(n)          ((volatile uint8_t *)(0xD002A0 + ((n) * 0x10)))   // n=0‑7 
+#define BRAM_GAME_NAME(n)           ((volatile uint8_t *)(0xD002A0 + ((n) * 0x10)))   // n=0‑7 
 // 0xD00320–0xD0831F : 8× game data blocks (4 kB each)
-#define BRAM_GAME_BLOCK(n)         ((volatile uint8_t *)(0xD00320 + ((n) * 0x1000))) // n=0‑7 
-#define BRAM_GAME_BLOCK_SIZE       0x1000
+#define BRAM_GAME_BLOCK(n)          ((volatile uint8_t *)(0xD00320 + ((n) * 0x1000))) // n=0‑7 
+#define BRAM_GAME_BLOCK_SIZE        0x1000
 
 // 0xD09BA0–0xD0A19F : bookkeeping records
 #define BRAM_BOOKKEEP_COIN_MONTH   ((volatile uint8_t *)0xD09BA0)  // Daily cab coin data. Each entry is $10 byte long. $240 in total. 18 bytes, 31 days?
@@ -77,11 +103,11 @@ void setup_backup_ram();
 void lock_backup_ram();
 void unlock_backup_ram();
 
-void init_game_data();
 void load_game_data();
 void save_game_data();
+void reset_game_data(uint16_t block);
 
-uint8_t find_game_data_block();
+uint16_t find_game_data_block(uint16_t rom_ngh);
 uint16_t find_game_data_block_by_name();
 uint16_t find_next_available_data_block();
 

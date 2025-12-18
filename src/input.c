@@ -107,9 +107,44 @@ void check_start_button() {
     }    
 }
 
+void check_change_game() {
+    if (0 != *BIOS_NEXT_GAME_ROTATE) {
+        return;
+    }
+
+    // If we are not in Title/Demo, skip the rest.
+    if (1 != *BIOS_USER_MODE) {
+        return;
+    }
+
+    // Game start compulsion (0 = enabled, 1 = disabled)
+    if (0 != *BRAM_DIP_GAME_START_FORCE) {
+        return;
+    }
+
+    // Check if freeplay / credit is enough
+    if (0 == *BRAM_CREDIT_P1 && 0 == *BRAM_CREDIT_P2 && 0 == *BRAM_DIP_GAME_SELECT_FREE) {
+        return;
+    }
+
+    // Check if the 'select' button is pressed
+    if (((*BIOS_STATCHANGE_RAW) & 0x0a) != 0) {
+        if (((*BIOS_STATCURRENT_RAW) & 0x02) != 0) {
+            // P1 select = next slot
+            *BIOS_SYSRET_STATUS = 4;
+        } else {
+            // P2 select = previous slot
+            *BIOS_SYSRET_STATUS = 5;
+        }
+        *BIOS_NEXT_GAME_ROTATE = 1;
+        SUBR_CART_DEMO_END();
+        system_return();
+    }
+}
+
 void check_compulsion_timer() {
     // Game start compulsion (0 = enabled, 1 = disabled)
-    if (0x00 != *BRAM_DIP_GAME_START_FORCE) {
+    if (0 != *BRAM_DIP_GAME_START_FORCE) {
         return;
     }
 
