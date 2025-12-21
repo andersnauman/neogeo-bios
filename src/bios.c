@@ -68,9 +68,10 @@ void _start() {
     if (0xFF != *BRAM_FIRST_PLAYABLE_SLOT) {
         *BRAM_SLOT_CURSOR = *BRAM_FIRST_PLAYABLE_SLOT;
         *REG_SLOT = *BRAM_FIRST_PLAYABLE_SLOT;
+        *BRAM_SLOT_SELECTED = *BRAM_FIRST_PLAYABLE_SLOT;
         *REG_SWPROM = 0;
-        *BIOS_SWPMODE = 0;        
-        *BIOS_USER_REQUEST = 0;                 // 0 = Initialize the default highscore etc   
+        *BIOS_SWPMODE = 0;
+        *BIOS_USER_REQUEST = USER_REQUEST_INIT;
         lock_backup_ram();
         SUBR_CART_USER();
     }
@@ -108,29 +109,52 @@ void set_default_values() {
 }
 
 void change_slot_incremental() {
-    uint8_t slot = (*BRAM_SLOT_SELECTED + 1) & (BRAM_MAX_SLOTS - 1);
-    for (int i = 0; i < BRAM_MAX_SLOTS; i++) {
-        if (BRAM_NGH_BLOCK[slot].ngh != 0x0000) {
+    uint8_t count = *BRAM_SLOT_COUNT;
+    if (count == 0 || count > BRAM_MAX_SLOTS) {
+        return;
+    }
+    uint8_t slot = *BRAM_SLOT_SELECTED + 1;
+    if (slot >= count) {
+        slot = 0;
+    }
+    for (uint8_t i = 0; i < count; i++) {
+        if (BIOS_NGH_BLOCK[slot].ngh != 0x0000) {
             *REG_SLOT = slot;
             unlock_backup_ram();
             *BRAM_SLOT_SELECTED = slot;
             lock_backup_ram();
             return;
         }
-        slot = (slot + 1) & (BRAM_MAX_SLOTS - 1);
+        slot++;
+        if (slot >= count) {
+            slot = 0;
+        }
     }
 }
 
 void change_slot_decremental() {
-    uint8_t slot = (*BRAM_SLOT_SELECTED - 1) & (BRAM_MAX_SLOTS - 1);
-    for (int i = 0; i < BRAM_MAX_SLOTS; i++) {
-        if (BRAM_NGH_BLOCK[slot].ngh != 0x0000) {
+    uint8_t count = *BRAM_SLOT_COUNT;
+    if (count == 0 || count > BRAM_MAX_SLOTS) {
+        return;
+    }
+    uint8_t slot = *BRAM_SLOT_SELECTED;
+    if (slot == 0) {
+        slot = count - 1;
+    } else {
+        slot--;
+    }
+    for (uint8_t i = 0; i < count; i++) {
+        if (BIOS_NGH_BLOCK[slot].ngh != 0x0000) {
             *REG_SLOT = slot;
             unlock_backup_ram();
             *BRAM_SLOT_SELECTED = slot;
             lock_backup_ram();
             return;
         }
-        slot = (slot - 1) & (BRAM_MAX_SLOTS - 1);
+        if (slot == 0) {
+            slot = count - 1;
+        } else {
+            slot--;
+        }
     }
 }

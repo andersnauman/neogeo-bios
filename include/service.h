@@ -10,6 +10,7 @@
 #define SERVICE_LED_COIN        ((volatile uint8_t *) 0x10FCDE)
 #define SERVICE_SOUND_CURSOR    ((volatile int8_t *)  0x10FCDE)
 #define SERVICE_SOUND_SELECT    ((volatile int8_t *)  0x10FCE2)
+#define SOFT_DIPS_GAME_SELECT   ((volatile int8_t *)  0x10FCE2)
 #define SERVICE_TEST            ((volatile uint8_t *) 0x10FCE3)
 
 #define NEW_BIOS_DATE(n)        ((volatile uint8_t *) (0x10FCE2 + (n)))
@@ -21,15 +22,20 @@
 #define NEW_BIOS_MINUTE         ((volatile uint8_t *) 0x10FCE7)
 #define NEW_BIOS_SECOND         ((volatile uint8_t *) 0x10FCE8)
 
+#define MENU_BUTTON_FORWARD         0x10
+#define MENU_BUTTON_BACKWARD        0x20
+
 // BIOS menu
-#define MENU_BIOS_MAIN          8
-#define MENU_BIOS_HARDWARE      9
-#define MENU_BIOS_HARD_DIPS     10
-#define MENU_BIOS_SOFT_DIPS     11
-#define MENU_BIOS_BOOK_KEEPING  12
-#define MENU_BIOS_CODE_NUMBER   13
-#define MENU_BIOS_CALENDAR      14
-#define MENU_BIOS_EXIT          15
+#define MENU_BIOS_MAIN              8
+#define MENU_BIOS_HARDWARE          9
+#define MENU_BIOS_HARD_DIPS         10
+#define MENU_BIOS_SOFT_DIPS         11
+#define MENU_BIOS_BOOK_KEEPING      12
+#define MENU_BIOS_CODE_NUMBER       13
+#define MENU_BIOS_CALENDAR          14
+#define MENU_BIOS_EXIT              15
+#define MENU_BIOS_SOFT_DIPS_CABINET 16
+#define MENU_BIOS_SOFT_DIPS_GAME    17
 
 // Hardware menu
 #define MAX_NUM_MENUS       7
@@ -42,8 +48,8 @@
 #define MENU_SETUP_CALENDAR 6
 
 void show_bios_menu();
-void show_bios_main_menu();
-void update_bios_main_menu();
+void show_bios_menu_service();
+void update_bios_menu_service();
 void show_bios_hardware_test();
 
 // Local service functions

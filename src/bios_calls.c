@@ -38,57 +38,61 @@ void system_return(void) {
 
     if (0 == *BIOS_SYSRET_STATUS) { // Init
         if (8 != *BRAM_SLOT_CURSOR) {
-            // save_dips()
             save_game_data();
             change_slot_incremental();
             unlock_backup_ram();
+            // If the selected slot is lower than the cursor, the system have overflowed the slots from max -> 0.
             if (*BRAM_SLOT_SELECTED <= *BRAM_SLOT_CURSOR) {
                 *BRAM_SLOT_CURSOR = 8;
             } else {
                 *BRAM_SLOT_CURSOR = *BRAM_SLOT_SELECTED;
             }
             lock_backup_ram();
-            // 0 = Initialize the default highscore etc
-            *BIOS_USER_REQUEST = 0;           
+            *BIOS_USER_REQUEST = USER_REQUEST_INIT;           
         }
         if (8 == *BRAM_SLOT_CURSOR) {
             // Check if service-button is pressed
             uint8_t service_button = ((~(*REG_STATUS_A)) & 0x4) >> 2;
             uint8_t dipsw_settings = (~(*REG_DIPSW)) & 0x1;
             if (service_button || dipsw_settings) {
+                *REG_BRDFIX = 0;
                 show_bios_menu();
             }
 
-            // If no game was found (could not read NGH-number), show test-menu
+            // If no game was found (could not read NGH-number), show hardware test menu
             if (0xFF == *BRAM_FIRST_PLAYABLE_SLOT) {
+                *REG_BRDFIX = 0;
                 show_bios_hardware_test();
             }
 
             // Normal initialization
             *REG_SLOT = *BRAM_FIRST_PLAYABLE_SLOT;
             *BRAM_SLOT_SELECTED = *BRAM_FIRST_PLAYABLE_SLOT;
-            *BIOS_SYSRET_STATUS = 3;
             load_game_data();
 
+            *BIOS_SYSRET_STATUS = 3;
             if (0 == *ROM_EYECATCH_FLAG) {          // Eyecatcher handled by BIOS
                 play_bios_eyecatcher();
             } else if (1 == *ROM_EYECATCH_FLAG) {   // Eyecatcher handled by Game
-                *BIOS_USER_REQUEST = 0x01;
+                *BIOS_USER_REQUEST = USER_REQUEST_EYECATCH;
             }
         }
     } else if (3 == *BIOS_SYSRET_STATUS) {  // Game over
-        save_game_data();
-        //load_game_data();
+        // Fail-safe to not overwrite already saved data during startup
+        if (USER_REQUEST_INIT != *BIOS_USER_REQUEST) {
+            save_game_data();
+        }
+        load_game_data();
         if (*BRAM_CREDIT_P1 != 0 || *BRAM_CREDIT_P2 != 0) {
-            *BIOS_USER_REQUEST = 0x03;
+            *BIOS_USER_REQUEST = USER_REQUEST_TITLE;
 
             // Reset compulsion timer
             if (0 == *BRAM_DIP_GAME_START_FORCE) {
-                *BIOS_COMPULSION_TIMER = *BRAM_DIP_GAME_START_TIME;
-                *BIOS_COMPULSION_FRAME_TIMER = 59;
+                *BIOS_COMPULSION_TIMER = *BRAM_DIP_COMPULSION_TIMER;
+                *BIOS_COMPULSION_FRAME_TIMER = *BRAM_DIP_COMPULSION_FRAME_TIMER;
             }
         } else {
-            *BIOS_USER_REQUEST = 0x02;
+            *BIOS_USER_REQUEST = USER_REQUEST_DEMO;
         }
     } else if (4 == *BIOS_SYSRET_STATUS || 5 == *BIOS_SYSRET_STATUS) {  // Next/previous slot
         save_game_data();
@@ -101,11 +105,11 @@ void system_return(void) {
         load_game_data();
         *BIOS_USER_MODE = 1;
         // Ignore eyecatcher when slot is changed
-        *BIOS_USER_REQUEST = 2;
+        *BIOS_USER_REQUEST = USER_REQUEST_DEMO;
 
         // Ignore Demo if credit is present
         if (*BRAM_CREDIT_P1 != 0 || *BRAM_CREDIT_P2 != 0) {
-            *BIOS_USER_REQUEST = 3;
+            *BIOS_USER_REQUEST = USER_REQUEST_TITLE;
         }
 
         *BIOS_NEXT_GAME_ROTATE = 0;
@@ -151,7 +155,7 @@ void system_io(void) {
         if (player_status & 0x000F == 1 || player_status & 0x00F0 == 1) {
             *BRAM_PLAY_FRAME_TIMER -= 1;
             if (*BRAM_PLAY_FRAME_TIMER == 0) {
-                *BRAM_PLAY_FRAME_TIMER = 0x3b;
+                *BRAM_PLAY_FRAME_TIMER = *BRAM_DIP_COMPULSION_FRAME_TIMER;  // TODO: Make sure this value is actually safe to use.
                 *BRAM_PLAY_SECONDS_HEX += 1;
             }
         }

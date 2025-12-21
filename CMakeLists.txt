@@ -5,6 +5,16 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
 endif()
 
+# Speed up rebuilds if ccache is available.
+option(ENABLE_CCACHE "Use ccache for faster rebuilds" ON)
+if(ENABLE_CCACHE)
+  find_program(CCACHE_PROGRAM ccache)
+  if(CCACHE_PROGRAM)
+    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+    set(CMAKE_ASM_COMPILER_LAUNCHER ${CCACHE_PROGRAM})
+  endif()
+endif()
+
 # Set target architecture
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR m68k)
@@ -28,7 +38,6 @@ ExternalProject_Add(
     checksum
     SOURCE_DIR ${CMAKE_SOURCE_DIR}/tools/checksum
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
-    BUILD_ALWAYS 1
 )
 
 add_executable(${PROJECT_NAME}.elf

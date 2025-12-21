@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+#include "backup_ram.h"
 #include "bios.h"
 #include "calendar.h"
 #include "mess_out.h"
@@ -16,30 +17,57 @@ void show_bios_menu() {
     uint8_t menu = MENU_BIOS_MAIN;
     while(1) {
         if (menu == MENU_BIOS_MAIN) {
-            show_bios_main_menu();
+            show_bios_menu_service();
         } else if (menu == MENU_BIOS_HARDWARE) {
             show_bios_hardware_test();
         } else if (menu == MENU_BIOS_HARD_DIPS) {
             show_bios_menu_hard_dips();
         } else if (menu == MENU_BIOS_SOFT_DIPS) {
             show_bios_menu_soft_dips();
+        } else if (menu == MENU_BIOS_SOFT_DIPS_CABINET) {
+            show_bios_menu_soft_dips_cabinet();
+        } else if (menu == MENU_BIOS_SOFT_DIPS_GAME) {
+            show_bios_menu_soft_dips_game();
         } else if (menu == MENU_BIOS_EXIT) {
             reset_system();
         }
         uint8_t previous_menu = menu;
         while (previous_menu == menu) {
             if (menu == MENU_BIOS_MAIN) {
-                update_bios_main_menu();
-                if (((*BIOS_P1CHANGE) & 0x10) != 0) {
+                update_bios_menu_service();
+                if (((*BIOS_P1CHANGE) & MENU_BUTTON_FORWARD) != 0) {
                     menu = MENU_BIOS_MAIN + (*SERVICE_CURSOR + 1);   // increase with one since cursor starts from 0
                 }
             } else if (menu == MENU_BIOS_HARD_DIPS) {
                 update_bios_menu_hard_dips();
             } else if (menu == MENU_BIOS_SOFT_DIPS) {
                 update_bios_menu_soft_dips();
+                if (((*BIOS_P1CHANGE) & MENU_BUTTON_FORWARD) != 0) {
+                    if (0 == *SERVICE_CURSOR) {
+                        menu = MENU_BIOS_SOFT_DIPS_CABINET;
+                    } else {
+                        if (BIOS_NGH_BLOCK[*SERVICE_CURSOR - 1].ngh == 0x0000) {
+                            continue;
+                        }
+                        menu = MENU_BIOS_SOFT_DIPS_GAME;
+                        *SOFT_DIPS_GAME_SELECT = *SERVICE_CURSOR - 1;
+                    }
+                } else if (((*BIOS_P1CHANGE) & MENU_BUTTON_BACKWARD) != 0) {
+                    menu = MENU_BIOS_MAIN;
+                }
+            } else if (menu == MENU_BIOS_SOFT_DIPS_CABINET) {
+                update_bios_menu_soft_dips_cabinet();
+                if (((*BIOS_P1CHANGE) & MENU_BUTTON_BACKWARD) != 0) {
+                    menu = MENU_BIOS_SOFT_DIPS;
+                }
+            } else if (menu == MENU_BIOS_SOFT_DIPS_GAME) {
+                update_bios_menu_soft_dips_game();
+                if (((*BIOS_P1CHANGE) & MENU_BUTTON_BACKWARD) != 0) {
+                    menu = MENU_BIOS_SOFT_DIPS;
+                }
             }
-            if (menu != MENU_BIOS_MAIN) {
-                if (((*BIOS_P1CHANGE) & 0x20) != 0) {
+            if (menu != MENU_BIOS_MAIN && menu != MENU_BIOS_SOFT_DIPS) {
+                if (((*BIOS_P1CHANGE) & MENU_BUTTON_BACKWARD) != 0) {
                     menu = MENU_BIOS_MAIN;
                 }
             }
@@ -51,7 +79,7 @@ void show_bios_menu() {
     }
 }
 
-void show_bios_main_menu() {
+void show_bios_menu_service() {
     *SERVICE_CURSOR = 0;
 
     *(uint32_t *)0x400002 = 0x0EEE0000; // Palette 0
@@ -86,7 +114,7 @@ void show_bios_main_menu() {
     *BIOS_MESS_BUSY = 0;
 }
 
-void update_bios_main_menu() {
+void update_bios_menu_service() {
     *BIOS_MESS_BUSY = 1;
     uint8_t menu_items = 7;
     _move_cursor(menu_items);

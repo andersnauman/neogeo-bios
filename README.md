@@ -54,12 +54,12 @@ apt-get install cmake gcc-m68k-linux-gnu
    ```sh
    mkdir build
    cd build
-   cmake .. -DSYSTEM=MVS -DREGION=EUROPE -DCMAKE_BUILD_TYPE=Debug
-   cmake --build .
+   cmake -S . -B build -DSYSTEM=MVS -DREGION=EUROPE -DCMAKE_BUILD_TYPE=Debug
+   cmake --build build --parallel
    ```
 4. Test the rom with MAME
     ```sh
-    mame neogeo -rompath ./ -skip_gameinfo -verbose -debug [gamename]
+    mame neogeo -rompath build/ -skip_gameinfo -verbose -debug -cart1 [gamename] -cart2 [gamename]
     ```
 #### File hierarchy
 ```sh

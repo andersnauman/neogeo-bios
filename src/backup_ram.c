@@ -34,8 +34,8 @@ void reset_backup_ram() {
     *BRAM_DIP_0x41 = 0x03;
     *BRAM_DIP_GAME_SELECT_FREE = 0x00;
     *BRAM_DIP_GAME_START_FORCE = 0x00;
-    *BRAM_DIP_GAME_START_TIME = to_bcd8(30);
-    *BRAM_DIP_0x45 = 0x3B;
+    *BRAM_DIP_COMPULSION_TIMER = to_bcd8(30);
+    *BRAM_DIP_COMPULSION_FRAME_TIMER = 0x3B;
     *BRAM_DIP_DEMO_SOUND = 0x00;
   
     // Reset saved slot data
@@ -54,7 +54,7 @@ void setup_backup_ram() {
 
     *BRAM_PLAY_SECONDS_HEX = 0;
     *BRAM_COIN_STATUS_PREVIOUS = 0;
-    *BRAM_PLAY_FRAME_TIMER = 0x3B;  // Same as BRAM_DIP_0x45? 
+    *BRAM_PLAY_FRAME_TIMER = *BRAM_DIP_COMPULSION_FRAME_TIMER;
 
     // Zero out credits
     // TODO: Maybe save credit if restarted?
@@ -127,6 +127,8 @@ void setup_backup_ram() {
 
     // Save 'orphan' games into a temporary slot at D00164
     volatile OrphanBookEntry* orphans  = ORPHAN_BOOKS;
+
+    // Reset data before populating it
     for (uint8_t i = 0; i < MAX_SLOTS; i++) {
         *WATCHDOG = 0;
         orphans[i].ngh = 0x0000;
@@ -134,7 +136,7 @@ void setup_backup_ram() {
         orphans[i].created = 0;
     }
 
-    uint8_t outIndex = 0;
+    uint8_t block_id = 0;
  
     // Loop all BRAM slots and check if those games exist in active BIOS slots
     for (uint8_t i = 0; i < MAX_SLOTS; i++) {
@@ -156,14 +158,14 @@ void setup_backup_ram() {
             continue;
         }
 
-        if (outIndex >= MAX_SLOTS) {
+        if (block_id >= MAX_SLOTS) {
             break;
         }
 
-        orphans[outIndex].ngh = BRAM_NGH_BLOCK[i].ngh;
-        orphans[outIndex].block = BRAM_NGH_BLOCK[i].block;
-        orphans[outIndex].created = *BRAM_SLOT_BOOKKEEP_DATE(i);
-        outIndex++;
+        orphans[block_id].ngh = BRAM_NGH_BLOCK[i].ngh;
+        orphans[block_id].block = BRAM_NGH_BLOCK[i].block;
+        orphans[block_id].created = *BRAM_SLOT_BOOKKEEP_DATE(i);
+        block_id++;
     }
 
     // Find already assigned blocks for current games and save it to BIOS slots
@@ -341,7 +343,6 @@ void reset_game_data(uint16_t block) {
 uint16_t find_game_data_block(uint16_t rom_ngh) {
     uint16_t block = 0xFFFF;
     for (uint16_t i = 0; i < BRAM_MAX_SLOTS; i++) {
-
         if (BRAM_NGH_BLOCK[i].ngh == rom_ngh) {
             block = BRAM_NGH_BLOCK[i].block;
             break;

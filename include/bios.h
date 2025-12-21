@@ -64,14 +64,14 @@
 #define REG_IRQACK       ((volatile uint16_t *) 0x3C000C)
 #define REG_TIMERSTOP    ((volatile uint16_t *) 0x3C000E)
 
-#define BIOS_CURRENT_SLOT_LED   ((volatile uint8_t *) 0x10FCEC)
+#define BIOS_CURRENT_SLOT_LED       ((volatile uint8_t *) 0x10FCEC)
 
 // Temporary storage for NGH during boot
 #define BIOS_NGH_BLOCK              ((volatile SlotEntry*) 0x10FD00)
 #define BIOS_SLOT_BOOKKEEP_DATE(n)  ((volatile uint32_t*) (0x10FD20 + ((n) * 4)))      // n=0‑7, YYMMDDdd 
 #define MAX_SLOTS                   8
 
-#define BIOS_SYSTEM_MODE     ((volatile uint8_t *) 0x10FD80)    // 0:BIOS wants vblank (system mode), 0x80:Ok to use vblank (game mode)
+#define BIOS_SYSTEM_MODE            ((volatile uint8_t *) 0x10FD80)    // 0:BIOS wants vblank (system mode), 0x80:Ok to use vblank (game mode)
 /*
 Status code for the system_return function.
 0 = Initialize the game
@@ -79,20 +79,25 @@ Status code for the system_return function.
 4 = Next slot, incremental
 5 = Next slot, decremental
 */
-#define BIOS_SYSRET_STATUS   ((volatile uint8_t *) 0x10FD81)
-#define BIOS_MVS_FLAG        ((volatile uint8_t *) 0x10FD82)    // 0:AES, 1:MVS
-#define BIOS_COUNTRY_CODE    ((volatile uint8_t *) 0x10FD83)    // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
-#define BIOS_GAME_DIP        ((volatile uint8_t *) 0x10FD84)
-#define BIOS_GAME_DIP_PTR    0x10FD84
-#define BIOS_PLAYER_MOD1     ((volatile uint8_t *) 0x10FDB6)
-#define BIOS_PLAYER_MOD2     ((volatile uint8_t *) 0x10FDB7)
-#define BIOS_PLAYER_MOD3     ((volatile uint8_t *) 0x10FDB8)
-#define BIOS_PLAYER_MOD4     ((volatile uint8_t *) 0x10FDB9)
+#define BIOS_SYSRET_STATUS      ((volatile uint8_t *) 0x10FD81)
+#define BIOS_MVS_FLAG           ((volatile uint8_t *) 0x10FD82)    // 0:AES, 1:MVS
+#define BIOS_COUNTRY_CODE       ((volatile uint8_t *) 0x10FD83)    // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
+#define BIOS_GAME_DIP           ((volatile uint8_t *) 0x10FD84)
+#define BIOS_GAME_DIP_PTR       0x10FD84
+#define BIOS_PLAYER_MOD1        ((volatile uint8_t *) 0x10FDB6)
+#define BIOS_PLAYER_MOD2        ((volatile uint8_t *) 0x10FDB7)
+#define BIOS_PLAYER_MOD3        ((volatile uint8_t *) 0x10FDB8)
+#define BIOS_PLAYER_MOD4        ((volatile uint8_t *) 0x10FDB9)
 /*
 BIOS asks game for this state when calling USER():
 0:Init, 1:Boot animation, 2:Demo, 3:Title
 */
-#define BIOS_USER_REQUEST    ((volatile uint8_t *) 0x10FDAE)
+#define BIOS_USER_REQUEST       ((volatile uint8_t *) 0x10FDAE)
+// BIOS_USER_REQUEST values
+#define USER_REQUEST_INIT       0x00
+#define USER_REQUEST_EYECATCH   0x01
+#define USER_REQUEST_DEMO       0x02
+#define USER_REQUEST_TITLE      0x03
 /*
 Game tells the BIOS where it is:
 0:Init/Boot animation, 1:Title/Demo, 2:Game
@@ -136,20 +141,20 @@ Game tells the BIOS where it is:
 #define BIOS_P4CREDIT_DEC    ((volatile uint8_t *) 0x10FDB3)
 #define BIOS_START_FLAG      ((volatile uint8_t *) 0x10FDB4)
 
-#define BIOS_PLAYER_MOD_START  ((volatile uint32_t *) 0x10FDBA)
-#define BIOS_PLAYER_MOD1_START ((volatile uint8_t *)  0x10FDBA)
-#define BIOS_PLAYER_MOD2_START ((volatile uint8_t *)  0x10FDBB)
-#define BIOS_PLAYER_MOD3_START ((volatile uint8_t *)  0x10FDBC)
-#define BIOS_PLAYER_MOD4_START ((volatile uint8_t *)  0x10FDBD)
+#define BIOS_PLAYER_MOD_START   ((volatile uint32_t *) 0x10FDBA)
+#define BIOS_PLAYER_MOD1_START  ((volatile uint8_t *)  0x10FDBA)
+#define BIOS_PLAYER_MOD2_START  ((volatile uint8_t *)  0x10FDBB)
+#define BIOS_PLAYER_MOD3_START  ((volatile uint8_t *)  0x10FDBC)
+#define BIOS_PLAYER_MOD4_START  ((volatile uint8_t *)  0x10FDBD)
 
 // Memory card registers
-#define BIOS_CARD_COMMAND    ((volatile uint8_t *)  0x10FDC4)
-#define BIOS_CARD_MODE       ((volatile uint8_t *)  0x10FDC5)
-#define BIOS_CARD_ANSWER     ((volatile uint8_t *)  0x10FDC6)
-#define BIOS_CARD_START      ((volatile uint32_t *) 0x10FDC8)
-#define BIOS_CARD_SIZE       ((volatile uint16_t *) 0x10FDCC)
-#define BIOS_CARD_NGH        ((volatile uint16_t *) 0x10FDCE)
-#define BIOS_CARD_SUB        ((volatile uint16_t *) 0x10FDD0)
+#define BIOS_CARD_COMMAND       ((volatile uint8_t *)  0x10FDC4)
+#define BIOS_CARD_MODE          ((volatile uint8_t *)  0x10FDC5)
+#define BIOS_CARD_ANSWER        ((volatile uint8_t *)  0x10FDC6)
+#define BIOS_CARD_START         ((volatile uint32_t *) 0x10FDC8)
+#define BIOS_CARD_SIZE          ((volatile uint16_t *) 0x10FDCC)
+#define BIOS_CARD_NGH           ((volatile uint16_t *) 0x10FDCE)
+#define BIOS_CARD_SUB           ((volatile uint16_t *) 0x10FDD0)
 
 // Memory card commands
 #define CARD_COMMAND_FORMAT         0
@@ -162,12 +167,12 @@ Game tells the BIOS where it is:
 #define CARD_COMMAND_USERNAME_LOAD  7
 
 // Memory card answers
-#define CARD_ANSWER_NOT_INSERTED   0x80
-#define CARD_ANSWER_NOT_FORMATED   0x81
-#define CARD_ANSWER_DATA_MISSING   0x82
-#define CARD_ANSWER_FAT_ERROR      0x83
-#define CARD_ANSWER_DATA_FULL      0x84
-#define CARD_ANSWER_WRITE_DISABLED 0x85
+#define CARD_ANSWER_NOT_INSERTED    0x80
+#define CARD_ANSWER_NOT_FORMATED    0x81
+#define CARD_ANSWER_DATA_MISSING    0x82
+#define CARD_ANSWER_FAT_ERROR       0x83
+#define CARD_ANSWER_DATA_FULL       0x84
+#define CARD_ANSWER_WRITE_DISABLED  0x85
 
 // Calendar
 #define BIOS_DATE(n)    ((volatile uint8_t *) (0x10FDD2 + (n)))
@@ -196,6 +201,7 @@ Game tells the BIOS where it is:
 #define BIOS_STATCHANGE_RAW      ((volatile uint8_t *)  0x10FEDD)  // Select P4, Start P4, Select P3, Start P3, Select P2, Start P2, Select P1, Start P1 (positive logic)
 #define BIOS_NEXT_GAME_ROTATE    ((volatile uint8_t *)  0x10FEE0)
 #define BIOS_FRAME_SKIP          ((volatile uint8_t *)  0x10FEE1)
+// 0x10FEE2 skip sound?
 #define BIOS_INT1_SKIP           ((volatile uint8_t *)  0x10FEE3)
 #define BIOS_INT1_FRAME_COUNTER  ((volatile uint8_t *)  0x10FEE4)
 
@@ -224,9 +230,10 @@ typedef void (*subr_fn_t)(void);
 #define SUBR_CART_DEMO_END       ((subr_fn_t)0x00012E)    // This sub-function is expected to return(RTS) as normal
 #define SUBR_CART_COIN_SOUND     ((subr_fn_t)0x000134)    // This sub-function is expected to return(RTS) as normal
 
-#define BIOS_COUNTRY_JAPAN  0
-#define BIOS_COUNTRY_USA    1
-#define BIOS_COUNTRY_EUROPE 2
+// Regions
+#define BIOS_COUNTRY_JAPAN       0
+#define BIOS_COUNTRY_USA         1
+#define BIOS_COUNTRY_EUROPE      2
 
 // In-game menu values
 #define BIOS_GAME_MENU_START_POSITION   0x710a
