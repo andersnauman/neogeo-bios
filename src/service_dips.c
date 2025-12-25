@@ -245,7 +245,6 @@ void update_bios_menu_hard_dips() {
 }
 
 void show_bios_menu_soft_dips() {
-    *SERVICE_CURSOR = 0;
     *SERVICE_CURSOR_MAX = 1;            // 1 because there are games + cabinet settings
     *(uint32_t *)0x400002 = 0x0EEE0000; // Palette 0
     *(uint32_t *)0x400022 = 0x0E000000; // Palette 1
@@ -364,7 +363,6 @@ void show_bios_menu_soft_dips_game() {
     *(uint32_t *)0x400022 = 0x0E000000; // Palette 1
     *BIOS_MESS_BUSY = 1;
 
-    *SERVICE_CURSOR = 0;
     uint8_t menu_items = 1;
 
     volatile uint16_t *address = (uint16_t *)BIOS_MESS_BUFFER_PTR;

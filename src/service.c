@@ -15,6 +15,10 @@ void show_bios_menu() {
     reset_palettes();
 
     uint8_t menu = MENU_BIOS_MAIN;
+    uint8_t cursor_sp = 0;
+    uint8_t cursor_stack[4] = {0};      // Previous cursor stack. Max depth of the menu system (4).
+    *SERVICE_CURSOR = 0;
+
     while(1) {
         if (menu == MENU_BIOS_MAIN) {
             show_bios_menu_service();
@@ -36,7 +40,11 @@ void show_bios_menu() {
             if (menu == MENU_BIOS_MAIN) {
                 update_bios_menu_service();
                 if (((*BIOS_P1CHANGE) & MENU_BUTTON_FORWARD) != 0) {
-                    menu = MENU_BIOS_MAIN + (*SERVICE_CURSOR + 1);   // increase with one since cursor starts from 0
+                    menu = MENU_BIOS_MAIN + (*SERVICE_CURSOR + 1);
+                    if (cursor_sp < sizeof(cursor_stack)) {
+                        cursor_stack[cursor_sp++] = *SERVICE_CURSOR;
+                        *SERVICE_CURSOR = 0;
+                    }
                 }
             } else if (menu == MENU_BIOS_HARD_DIPS) {
                 update_bios_menu_hard_dips();
@@ -52,36 +60,43 @@ void show_bios_menu() {
                         menu = MENU_BIOS_SOFT_DIPS_GAME;
                         *SOFT_DIPS_GAME_SELECT = *SERVICE_CURSOR - 1;
                     }
+                    // TOOD: Maybe make an else to handle max depth scenario?
+                    if (cursor_sp < sizeof(cursor_stack)) {
+                        cursor_stack[cursor_sp++] = *SERVICE_CURSOR;
+                        *SERVICE_CURSOR = 0;
+                    }
                 } else if (((*BIOS_P1CHANGE) & MENU_BUTTON_BACKWARD) != 0) {
                     menu = MENU_BIOS_MAIN;
+                    *SERVICE_CURSOR = (cursor_sp > 0) ? cursor_stack[--cursor_sp] : 0;
                 }
             } else if (menu == MENU_BIOS_SOFT_DIPS_CABINET) {
                 update_bios_menu_soft_dips_cabinet();
                 if (((*BIOS_P1CHANGE) & MENU_BUTTON_BACKWARD) != 0) {
                     menu = MENU_BIOS_SOFT_DIPS;
+                    *SERVICE_CURSOR = (cursor_sp > 0) ? cursor_stack[--cursor_sp] : 0;
                 }
             } else if (menu == MENU_BIOS_SOFT_DIPS_GAME) {
                 update_bios_menu_soft_dips_game();
                 if (((*BIOS_P1CHANGE) & MENU_BUTTON_BACKWARD) != 0) {
                     menu = MENU_BIOS_SOFT_DIPS;
+                    *SERVICE_CURSOR = (cursor_sp > 0) ? cursor_stack[--cursor_sp] : 0;
                 }
             }
             if (menu != MENU_BIOS_MAIN && menu != MENU_BIOS_SOFT_DIPS) {
                 if (((*BIOS_P1CHANGE) & MENU_BUTTON_BACKWARD) != 0) {
                     menu = MENU_BIOS_MAIN;
+                    *SERVICE_CURSOR = (cursor_sp > 0) ? cursor_stack[--cursor_sp] : 0;
                 }
             }
             wait_for_vblank();
         }
-        wait_for_vblank();
+        //wait_for_vblank();
         reset_fix_layer();
         reset_palettes();
     }
 }
 
 void show_bios_menu_service() {
-    *SERVICE_CURSOR = 0;
-
     *(uint32_t *)0x400002 = 0x0EEE0000; // Palette 0
     *(uint32_t *)0x400022 = 0x0E000000; // Palette 1
     *BIOS_MESS_BUSY = 1;
