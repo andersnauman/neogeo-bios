@@ -90,7 +90,6 @@ void show_bios_menu() {
             }
             wait_for_vblank();
         }
-        //wait_for_vblank();
         reset_fix_layer();
         reset_palettes();
     }

@@ -137,6 +137,14 @@ void reset_sprites() {
     }    
 }
 
+void pause_system() {
+    __asm__ volatile ("move #0x2700, %sr");     // Disable interrupts
+    while(((*REG_DIPSW) & 0x80) == 0) {
+        *WATCHDOG = 0;
+    }
+    __asm__ volatile ("move #0x2000, %sr");     // Set interrupt mask to level 2
+}
+
 void reset_system() {
     __asm__ volatile ("move.l #0x10F300, %sp");
     __asm__ volatile ("jmp 0x00c00500.l");
@@ -155,7 +163,7 @@ void *memset(void *ptr, int value, size_t num) {
 }
 
 void *memcpy(void *dest, const void *src, size_t num) {
-    unsigned char       *d = (unsigned char *)dest;
+    unsigned char *d = (unsigned char *)dest;
     const unsigned char *s = (const unsigned char *)src;
 
     while (num--) {

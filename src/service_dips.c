@@ -167,7 +167,7 @@ void update_bios_menu_hard_dips() {
     address += 1;
     *address = 0x0108;
     address += 1;        
-    i = *REG_DIPSW & 0x20 ? 1 : 0;
+    i = (*REG_DIPSW & 0x20) ? 1 : 0;
     for (uint8_t c = 0; bios_menu_on_off[i][c] != '\0'; c++) {
         *(volatile uint8_t *)address = (bios_menu_on_off[i][c]);
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
@@ -359,6 +359,7 @@ void update_bios_menu_soft_dips_cabinet() {
 }
 
 void show_bios_menu_soft_dips_game() {
+    *SERVICE_CURSOR_MAX = 0;
     *(uint32_t *)0x400002 = 0x0EEE0000; // Palette 0
     *(uint32_t *)0x400022 = 0x0E000000; // Palette 1
     *BIOS_MESS_BUSY = 1;
@@ -430,6 +431,7 @@ void show_bios_menu_soft_dips_game() {
         *address = 0xFFFF;
         address++;
         description_offset += 0xC;
+        *SERVICE_CURSOR_MAX += 1;
     }
 
     // Special count settings
@@ -453,6 +455,7 @@ void show_bios_menu_soft_dips_game() {
         *address = 0xFFFF;
         address++;
         description_offset += 0xC;
+        *SERVICE_CURSOR_MAX += 1;
     }
 
     // Simple settings
@@ -479,6 +482,7 @@ void show_bios_menu_soft_dips_game() {
         *choosen_option_offset_ptr = description_offset + 0xC;
         choosen_option_offset_ptr++;
         description_offset += 0xC + (0xC * choices);
+        *SERVICE_CURSOR_MAX += 1;
     }
 
     // Values
@@ -504,5 +508,44 @@ void show_bios_menu_soft_dips_game() {
 }
 
 void update_bios_menu_soft_dips_game() {
-    
+    *BIOS_MESS_BUSY = 1;
+    uint8_t menu_items = *SERVICE_CURSOR_MAX;
+    _move_cursor(menu_items);
+
+    volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
+    *address = 0x0000;
+    address++;
+    *address = 0x0000;
+    address++;
+
+    *address = 0x0003;
+    address += 1;
+    *address = 0x70E8;
+    address += 1;        
+
+    for (uint8_t i = 0; i < menu_items; i++) {
+        if (i != *SERVICE_CURSOR) {
+            *address = 0x0108;
+            address++;
+            *address = 0x20FF;  // Space (overwrite arrow)
+            address += 1;
+        } else {
+            *address = 0x1108;
+            address += 1;
+            *address = 0x11FF;  // Arrow
+            address += 1;
+        }
+        if (menu_items - 1 != i) {
+            *address = 0x0005;
+            address += 1;
+            *address = 0x0002;
+            address += 1;
+        }
+    }
+
+    *address = 0x0000;
+    address++;
+    *BIOS_MESS_POINT = (volatile uint32_t)address;
+
+    *BIOS_MESS_BUSY = 0;
 }

@@ -26,19 +26,33 @@ void _start() {
 
     test_led();
     test_work_ram();
+#if defined(SYSTEM_MVS)    
     test_backup_ram();
+#endif    
     test_palette_ram();
     test_video_ram();
 
     *BIOS_SWPMODE = 0xFF;
 
-    uint8_t request_reset_backup = 0;
-    while (0 == *REG_DIPSW) {
-        test_work_ram();
-        test_backup_ram();
-        request_reset_backup = 1;
-    }
-    if (1 == request_reset_backup) {
+    // Test work RAM in an 'infinate' loop if all dips are active
+    // Note: Should not depend on any defined variables laying in work ram.
+    if (0 == *REG_DIPSW) {
+        reset_fix_layer();
+        reset_palettes();
+
+        *(uint32_t *)0x400002 = 0x0EEE0000;     // Palette 0
+        *BIOS_MESS_BUSY = 1;
+        *(volatile uint32_t *) BIOS_MESS_BUFFER = (uint32_t)work_ram_test;
+        *BIOS_MESS_POINT = BIOS_MESS_BUFFER_PTR + sizeof(uint32_t);
+        *BIOS_MESS_BUSY = 0;
+        mess_out();
+
+        while (0 == *REG_DIPSW) {
+            test_work_ram();
+#if defined(SYSTEM_MVS)
+            test_backup_ram();                  // Original BIOS also test/reset Backup-RAM
+#endif
+        }
         reset_backup_ram();
     }
 

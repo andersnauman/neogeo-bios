@@ -121,6 +121,11 @@ void system_return(void) {
 void system_io(void) {
     update_coin();
     update_controller_input();
+    // TODO: Include a in-game pause with controller
+    // Maybe use a global pause_requested variable to use outside of system_io()?
+    if (((*REG_DIPSW) & 0x80) == 0) {
+        pause_system();
+    }
 
     int8_t skip_frame = (int8_t)*BIOS_FRAME_SKIP;
     if (skip_frame > 0) {
