@@ -107,10 +107,8 @@ void show_bios_menu_service() {
     *BIOS_MESS_POINT = BIOS_MESS_BUFFER_PTR + sizeof(uint32_t);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
-    *address = 0x0000;
-    address++;
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
+    *address++ = 0x0000;
 
     _read_calendar();
 
@@ -124,8 +122,7 @@ void show_bios_menu_service() {
         address = _add_large_char(address, 0, 0x727A, *BIOS_DAY);
     }
 
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
     *BIOS_MESS_POINT = (volatile uint32_t)address;        
 
     *BIOS_MESS_BUSY = 0;
@@ -137,38 +134,27 @@ void update_bios_menu_service() {
     _move_cursor(menu_items, 0);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
-    *address = 0x0000;
-    address++;
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
+    *address++ = 0x0000;
 
-    *address = 0x0003;
-    address += 1;
-    *address = 0x70E5;
-    address += 1;        
+    *address++ = 0x0003;
+    *address++ = 0x70E5;
 
     for (int8_t i = 0; i < menu_items; i++) {
         if (i != *SERVICE_CURSOR) {
-            *address = 0x0108;
-            address++;
-            *address = 0x20FF;  // Space (overwrite arrow)
-            address += 1;
+            *address++ = 0x0108;
+            *address++ = 0x20FF;  // Space (overwrite arrow)
         } else {
-            *address = 0x1108;
-            address += 1;
-            *address = 0x11FF;  // Arrow
-            address += 1;
+            *address++ = 0x1108;
+            *address++ = 0x11FF;  // Arrow
         }
         if (menu_items - 1 != i) {
-            *address = 0x0005;
-            address += 1;
-            *address = 0x0002;
-            address += 1;
+            *address++ = 0x0005;
+            *address++ = 0x0002;
         }
     }
 
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
     *BIOS_MESS_POINT = (volatile uint32_t)address;
 
     *BIOS_MESS_BUSY = 0;    

@@ -61,8 +61,7 @@ void setup_backup_ram() {
     volatile uint8_t *address = (volatile uint8_t *)BRAM_COIN_COUNTER_INTERNAL;
     for (uint8_t i = 0; i < 22; i++) {
         *WATCHDOG = 0;
-        *address = 0x00;
-        address++;
+        *address++ = 0x00;
     }
 
     // TODO: Read calendar from RTC
@@ -100,7 +99,12 @@ void setup_backup_ram() {
                 *BRAM_FIRST_PLAYABLE_SLOT = slot;
             }
 
-            // TODO: Verify security string 
+            if (!validate_security_code()) {
+                continue;
+            }
+            // "NEO-GEO"
+            // "NEO-CLN"
+            // 4E 00 4F 00 47 00 4F (N \0 O \0 G \0 O)
 
             BIOS_NGH_BLOCK[slot] = (SlotEntry){
                 .ngh = *ROM_NGH_NUMBER,
@@ -108,9 +112,7 @@ void setup_backup_ram() {
             };
         }
     }
-    *BRAM_SLOT_SELECTED = *BRAM_FIRST_PLAYABLE_SLOT;
-    *REG_SLOT = *BRAM_FIRST_PLAYABLE_SLOT;
-   
+
     // Check for duplicate games
     for (uint8_t i = 0; i + 1 < *BRAM_SLOT_COUNT; i++) {
         *WATCHDOG = 0;

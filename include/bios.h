@@ -210,18 +210,37 @@ Game tells the BIOS where it is:
 #define SROM_COUNTRY_CODE        ((volatile uint8_t *)  0xC00401)   // 0x00 = Japan, 0x01 = USA, 0x02 = Europe
 
 // ROM registers
+#define ROM_HEADER_PTR           ((volatile char     *) 0x000100)
 #define ROM_NGH_NUMBER           ((volatile uint16_t *) 0x000108)   // The game's identifying number, used for memory card saves and MVS bookkeeping.
 #define ROM_PROGRAM_SIZE         ((volatile uint32_t *) 0x00010A)   // The size of the program (in bytes).
 #define ROM_BACKUP_RAM_PTR       ((volatile uint32_t *) 0x00010E)   // Points to a location in user RAM, used on MVS for saving backup data. (The first two bytes are used for debug dipswitches.
 #define ROM_GAME_SAVE_SIZE       ((volatile uint16_t *) 0x000112)   // Size of the game's save size (in bytes).
-#define ROM_EYECATCH_FLAG        ((volatile uint8_t *)  0x000114)   // Determines how/if the BIOS plays the eyecatcher sequence. (0=handled by BIOS; 1=handled by game; 2=don't show)
-#define ROM_EYECATCH_SPRITE_BANK ((volatile uint8_t *)  0x000115)   // Defines the upper 8 bits of the tile number for the eyecatcher, if handled by the BIOS.
+#define ROM_EYECATCH_FLAG        ((volatile uint8_t  *) 0x000114)   // Determines how/if the BIOS plays the eyecatcher sequence. (0=handled by BIOS; 1=handled by game; 2=don't show)
+#define ROM_EYECATCH_SPRITE_BANK ((volatile uint8_t  *) 0x000115)   // Defines the upper 8 bits of the tile number for the eyecatcher, if handled by the BIOS.
 #define ROM_SOFTDIP_TABLE        ((volatile uint32_t *) 0x000116)
 #define ROM_JPN_SOFTDIP          ((volatile uint32_t *) 0x000116)
 #define ROM_USA_SOFTDIP          ((volatile uint32_t *) 0x00011A)
 #define ROM_EU_SOFTDIP           ((volatile uint32_t *) 0x00011E)
-#define ROM_SECURITY_CODE        (*(volatile uint32_t *) 0x000182)
-#define ROM_SECURITY_CODE_PTR    ((volatile char (*)[188]) (uintptr_t) ROM_SECURITY_CODE)
+#define ROM_SECURITY_CODE_PTR    (*(volatile uint32_t*) 0x000182)
+
+static const uint8_t security_bytes [] = {
+    0x76, 0x00, 0x4A, 0x6D, 0x0A, 0x14, 0x66, 0x00,
+    0x00, 0x3C, 0x20, 0x6D, 0x0A, 0x04, 0x3E, 0x2D,
+    0x0A, 0x08, 0x13, 0xC0, 0x00, 0x30, 0x00, 0x01,
+    0x32, 0x10, 0x0C, 0x01, 0x00, 0xFF, 0x67, 0x1A,
+    0x30, 0x28, 0x00, 0x02, 0xB0, 0x2D, 0x0A, 0xCE,
+    0x66, 0x10, 0x30, 0x28, 0x00, 0x04, 0xB0, 0x2D,
+    0x0A, 0xCF, 0x66, 0x06, 0xB2, 0x2D, 0x0A, 0xD0,
+    0x67, 0x08, 0x50, 0x88, 0x51, 0xCF, 0xFF, 0xD4,
+    0x36, 0x07, 0x4E, 0x75, 0x20, 0x6D, 0x0A, 0x04,
+    0x3E, 0x2D, 0x0A, 0x08, 0x32, 0x10, 0xE0, 0x49,
+    0x0C, 0x01, 0x00, 0xFF, 0x67, 0x1A, 0x30, 0x10,
+    0xB0, 0x2D, 0x0A, 0xCE, 0x66, 0x12, 0x30, 0x28,
+    0x00, 0x02, 0xE0, 0x48, 0xB0, 0x2D, 0x0A, 0xCF,
+    0x66, 0x06, 0xB2, 0x2D, 0x0A, 0xD0, 0x67, 0x08,
+    0x58, 0x88, 0x51, 0xCF, 0xFF, 0xD8, 0x36, 0x07,
+    0x4E, 0x75
+};
 
 // Jump rutines
 typedef void (*subr_fn_t)(void);
@@ -246,9 +265,13 @@ typedef void (*subr_fn_t)(void);
 #define BIOS_GAME_PALETTE_1             ((volatile uint32_t *) 0x10FE98)
 //#define BIOS_GAME_PALETTE_2             ((volatile uint16_t *) 0x10FE94)
 
+static const char _rom_header_str[] = "NEO-GEO";
+
 void start_game();
 void set_default_values();
+void enable_slot(uint8_t slot);
 void change_slot_incremental();
 void change_slot_decremental();
+uint8_t validate_security_code();
 
 #endif // _BIOS_H

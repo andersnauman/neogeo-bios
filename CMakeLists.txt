@@ -55,7 +55,6 @@ add_executable(${PROJECT_NAME}.elf
     "src/input.c"
     "src/interrupt.c"
     "src/led.c"
-    "src/main.c"
     "src/mess_out.c"
     "src/service.c"
     "src/service_dips.c"

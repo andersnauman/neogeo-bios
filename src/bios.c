@@ -57,7 +57,7 @@ void _start() {
     }
 
     test_rtc();
-    test_bios_checksum();   
+    test_bios_checksum();
     test_sound();
     test_memory_card();
 
@@ -77,16 +77,15 @@ void _start() {
     __asm__ volatile ("move #0x2000, %sr");     // Set interrupt mask to level 2
 
     *BIOS_SYSRET_STATUS = 0;
-    unlock_backup_ram();    
+ 
+    unlock_backup_ram();
     *BRAM_SLOT_CURSOR = 8;
     if (0xFF != *BRAM_FIRST_PLAYABLE_SLOT) {
         *BRAM_SLOT_CURSOR = *BRAM_FIRST_PLAYABLE_SLOT;
-        *REG_SLOT = *BRAM_FIRST_PLAYABLE_SLOT;
-        *BRAM_SLOT_SELECTED = *BRAM_FIRST_PLAYABLE_SLOT;
-        *REG_SWPROM = 0;
+        lock_backup_ram();        
+        enable_slot(*BRAM_FIRST_PLAYABLE_SLOT);
         *BIOS_SWPMODE = 0;
         *BIOS_USER_REQUEST = USER_REQUEST_INIT;
-        lock_backup_ram();
         SUBR_CART_USER();
     }
     lock_backup_ram();
@@ -122,6 +121,16 @@ void set_default_values() {
     *BIOS_INT1_SKIP = 0;        // Only used to skip input when checking for RTC-pulse with interrupts enabled?
 }
 
+void enable_slot(uint8_t slot) {
+    wait_for_z80();
+    unlock_backup_ram();
+    *BRAM_SLOT_SELECTED = slot;
+    lock_backup_ram();
+    *REG_SLOT = slot;
+    *REG_CRTFIX = 0;
+    *REG_SWPROM = 0;
+}
+
 void change_slot_incremental() {
     uint8_t count = *BRAM_SLOT_COUNT;
     if (count == 0 || count > BRAM_MAX_SLOTS) {
@@ -133,10 +142,7 @@ void change_slot_incremental() {
     }
     for (uint8_t i = 0; i < count; i++) {
         if (BIOS_NGH_BLOCK[slot].ngh != 0x0000) {
-            *REG_SLOT = slot;
-            unlock_backup_ram();
-            *BRAM_SLOT_SELECTED = slot;
-            lock_backup_ram();
+            enable_slot(slot);
             return;
         }
         slot++;
@@ -159,10 +165,7 @@ void change_slot_decremental() {
     }
     for (uint8_t i = 0; i < count; i++) {
         if (BIOS_NGH_BLOCK[slot].ngh != 0x0000) {
-            *REG_SLOT = slot;
-            unlock_backup_ram();
-            *BRAM_SLOT_SELECTED = slot;
-            lock_backup_ram();
+            enable_slot(slot);
             return;
         }
         if (slot == 0) {
@@ -171,4 +174,16 @@ void change_slot_decremental() {
             slot--;
         }
     }
+}
+
+uint8_t validate_security_code() {
+    volatile const uint8_t *rom_bytes = (volatile const uint8_t *)ROM_SECURITY_CODE_PTR;
+
+    for (uint8_t i = 0; i < sizeof(security_bytes); i++) {
+        if (rom_bytes[i] != security_bytes[i]) {
+            return 0;
+        }
+    }
+
+    return 1;
 }

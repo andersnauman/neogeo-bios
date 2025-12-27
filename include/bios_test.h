@@ -54,10 +54,6 @@ static inline void test_work_ram() {
     __asm__ volatile ("move.l #0x10F300, %sp");
 };
 
-static const char _backup_ram_str[] = "NEO-GEO ";
-static const char _memory_card_str[] = "SNK ROM ";
-static const char _palette_test_str[] = "TESTING PALETTE";
-
 static const uint16_t work_ram_test[] = {
     0x0003, 0x71ce,
     0x0108, 0x574f, 0x524b, 0x2052, 0x414d, 0x2054, 0x4553, 0x54ff,

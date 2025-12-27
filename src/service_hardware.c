@@ -159,44 +159,37 @@ void update_io_test() {
     // P1
     uint8_t controller = *BIOS_P1CURRENT;
     for (uint8_t i = 0; i < 8; i++) {
-        *address = (controller & 1) | 0x30;
+        *address++ = (controller & 1) | 0x30;
         controller >>= 1;
-        address++;
     }
     uint8_t start_select = *BIOS_STATCURRENT_RAW;
     for (uint8_t i = 0; i < 2; i++) {
-        *address = (start_select & 1) | 0x30;
+        *address++ = (start_select & 1) | 0x30;
         start_select >>= 1;
-        address++;
     }
     // P2
     controller = *BIOS_P2CURRENT;
     for (uint8_t i = 0; i < 8; i++) {
-        *address = (controller & 1) | 0x30;
+        *address++ = (controller & 1) | 0x30;
         controller >>= 1;
-        address++;
     }
     for (uint8_t i = 0; i < 2; i++) {
-        *address = (start_select & 1) | 0x30;
+        *address++ = (start_select & 1) | 0x30;
         start_select >>= 1;
-        address++;
     }
     // Hardware dip switches
     uint8_t hw_dipsw = ~(*REG_DIPSW);
     for (uint8_t i = 0; i < 8; i++) {
-        *address = (hw_dipsw & 1) | 0x30;
+        *address++ = (hw_dipsw & 1) | 0x30;
         hw_dipsw >>= 1;
-        address++;
     }
     // Test button
-    *address = ((~(*REG_SYSTYPE) & 0x80) >> 7) | 0x30;
-    address++;
+    *address++ = ((~(*REG_SYSTYPE) & 0x80) >> 7) | 0x30;
 
     uint8_t coin_service = *BRAM_COIN_STATUS_CURRENT;
     for (uint8_t i = 0; i < 3; i++) {
-        *address = (coin_service & 1) | 0x30;
+        *address++ = (coin_service & 1) | 0x30;
         coin_service >>= 1;
-        address++;
     }
 
     *BIOS_MESS_BUSY = 0;
@@ -264,46 +257,33 @@ void update_sound_test() {
     *BIOS_MESS_POINT = *BIOS_MESS_POINT + sizeof(uint32_t);
 
     volatile uint16_t *address = (volatile uint16_t *)0x10FC00;
-    *address = 0x2002;
-    address += 1;    
-    *address = 0x0003;
-    address += 1;
-    *address = 0x71ca;
-    address += 1;
+    *address++ = 0x2002;
+    *address++ = 0x0003;
+    *address++ = 0x71ca;
 
     // Print the cursor
     for (uint8_t i = 0; i < 4; i++) {
         if (i == *SERVICE_SOUND_CURSOR) {
-            *address = ((uint16_t)0x11 << 8) | 0x08;    // Palette 1, additional 0x1100 to char
-            address += 1;
-            *address = 0x11FF;                          // Arrow
-            address += 1;
+            *address++ = ((uint16_t)0x11 << 8) | 0x08;    // Palette 1, additional 0x1100 to char
+            *address++ = 0x11FF;                          // Arrow
         } else {
-            *address = ((uint16_t)0x01 << 8) | 0x08;    // Palette 0, additional 0x0100 to char
-            address += 1;
-            *address = 0x20FF;                          // Space (must be here to clear the arrow)
-            address += 1;
+            *address++ = ((uint16_t)0x01 << 8) | 0x08;    // Palette 0, additional 0x0100 to char
+            *address++ = 0x20FF;                          // Space (must be here to clear the arrow)
         }
-        *address = 0x0005;
-        address += 1;
-        *address = 0x0002;
-        address += 1;        
+        *address++ = 0x0005;
+        *address++ = 0x0002;
     }
 
-    *address = 0x0003;
-    address += 1;
-    *address = 0x724a;
-    address += 1;
+    *address++ = 0x0003;
+    *address++ = 0x724a;
 
     // Print the text
     for (uint8_t i = 0; i < 4; i++) {
         // Set the color for the selected option
         if (i == *SERVICE_SOUND_SELECT) {
-            *address = ((uint16_t)0x11 << 8) | 0x08;    // Palette 1, additional 0x1100 to char
-            address += 1;
+            *address++ = ((uint16_t)0x11 << 8) | 0x08;    // Palette 1, additional 0x1100 to char
         } else {
-            *address = ((uint16_t)0x01 << 8) | 0x08;    // Palette 0, additional 0x0100 to char
-            address += 1;
+            *address++ = ((uint16_t)0x01 << 8) | 0x08;    // Palette 0, additional 0x0100 to char
         }
 
         // Add the text from an array based on the loop iteration
@@ -315,15 +295,12 @@ void update_sound_test() {
             *(volatile uint8_t *)address = 0xFF;
             address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
         } else {
-            *address = 0xFFFF;
-            address += 1;            
+            *address++ = 0xFFFF;
         }
-        *address = 0x0005;
-        address += 1;
-        *address = 0x0002;
-        address += 1;
+        *address++ = 0x0005;
+        *address++ = 0x0002;
     }
-    *address = 0x000B;
+    *address++ = 0x000B;
     *BIOS_MESS_BUSY = 0;
 }
 
@@ -401,10 +378,8 @@ void update_setup_calendar() {
     *BIOS_MESS_BUSY = 1;
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
-    *address = 0x0000;
-    address++;
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
+    *address++ = 0x0000;
 
     // Current date section
     address = _add_large_char(address, 0, 0x722C, *BIOS_YEAR);
@@ -498,8 +473,7 @@ void update_setup_calendar() {
     address = _add_large_char(address, (*SERVICE_CALENDAR_CURSOR & 16 ? 1 : 0), 0x72F3, *NEW_BIOS_MINUTE);
     address = _add_large_char(address, (*SERVICE_CALENDAR_CURSOR & 32 ? 1 : 0), 0x7353, *NEW_BIOS_SECOND);
 
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
     *BIOS_MESS_POINT = (volatile uint32_t)address;
 
     *BIOS_MESS_BUSY = 0;
