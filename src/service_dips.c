@@ -22,29 +22,19 @@ void update_bios_menu_hard_dips() {
     *BIOS_MESS_BUSY = 1;
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
-    *address = 0x0000;
-    address++;
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
+    *address++ = 0x0000;
 
-    *address = 0x2002;
-    address += 1;
+    *address++ = 0x2002;
 
     // Setting mode
-    *address = 0x0003;
-    address += 1;
-    *address = 0x724c;
-    address += 1;
-    *address = 0x0108;
-    address += 1;
-    *address = (*REG_DIPSW & 0x01) ? 0x30FF : 0x31FF;
-    address += 1;
-    *address = 0x0003;
-    address += 1;
-    *address = 0x738c;
-    address += 1;
-    *address = 0x0108;
-    address += 1;        
+    *address++ = 0x0003;
+    *address++ = 0x724c;
+    *address++ = 0x0108;
+    *address++ = (*REG_DIPSW & 0x01) ? 0x30FF : 0x31FF;
+    *address++ = 0x0003;
+    *address++ = 0x738c;
+    *address++ = 0x0108;
     uint8_t i = *REG_DIPSW & 0x01 ? 1 : 0;
     for (uint8_t c = 0; bios_menu_on_off[i][c] != '\0'; c++) {
         *(volatile uint8_t *)address = (bios_menu_on_off[i][c]);
@@ -54,25 +44,17 @@ void update_bios_menu_hard_dips() {
         *(volatile uint8_t *)address = 0xFF;
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
     } else {
-        *address = 0xFFFF;
-        address += 1;
+        *address++ = 0xFFFF;
     }
 
     // Controller
-    *address = 0x0003;
-    address += 1;
-    *address = 0x726e;
-    address += 1;
-    *address = 0x0108;
-    address += 1;
-    *address = (*REG_DIPSW & 0x02) ? 0x30FF : 0x31FF;
-    address += 1;
-    *address = 0x0003;
-    address += 1;
-    *address = 0x738e;
-    address += 1;
-    *address = 0x0108;
-    address += 1;        
+    *address++ = 0x0003;
+    *address++ = 0x726e;
+    *address++ = 0x0108;
+    *address++ = (*REG_DIPSW & 0x02) ? 0x30FF : 0x31FF;
+    *address++ = 0x0003;
+    *address++ = 0x738e;
+    *address++ = 0x0108;
     i = *REG_DIPSW & 0x02 ? 1 : 0;
     for (uint8_t c = 0; bios_menu_on_off[i][c] != '\0'; c++) {
         *(volatile uint8_t *)address = (bios_menu_on_off[i][c]);
@@ -82,25 +64,17 @@ void update_bios_menu_hard_dips() {
         *(volatile uint8_t *)address = 0xFF;
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
     } else {
-        *address = 0xFFFF;
-        address += 1;
+        *address++ = 0xFFFF;
     }   
 
     // Chute
-    *address = 0x0003;
-    address += 1;
-    *address = 0x7290;
-    address += 1;
-    *address = 0x0108;
-    address += 1;
-    *address = (*REG_DIPSW & 0x04) ? 0x30FF : 0x31FF;
-    address += 1;
-    *address = 0x0003;
-    address += 1;
-    *address = 0x7390;
-    address += 1;
-    *address = 0x0108;
-    address += 1;        
+    *address++ = 0x0003;
+    *address++ = 0x7290;
+    *address++ = 0x0108;
+    *address++ = (*REG_DIPSW & 0x04) ? 0x30FF : 0x31FF;
+    *address++ = 0x0003;
+    *address++ = 0x7390;
+    *address++ = 0x0108;
     i = *REG_DIPSW & 0x04 ? 1 : 0;
     for (uint8_t c = 0; bios_menu_on_off[i][c] != '\0'; c++) {
         *(volatile uint8_t *)address = (bios_menu_on_off[i][c]);
@@ -110,35 +84,23 @@ void update_bios_menu_hard_dips() {
         *(volatile uint8_t *)address = 0xFF;
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
     } else {
-        *address = 0xFFFF;
-        address += 1;
+        *address++ = 0xFFFF;
     }        
 
     // Communication - Dip 1
-    *address = 0x0003;
-    address += 1;
-    *address = 0x72b2;
-    address += 1;
-    *address = 0x0108;
-    address += 1;
-    *address = (*REG_DIPSW & 0x08) ? 0x30FF : 0x31FF;
-    address += 1;
+    *address++ = 0x0003;
+    *address++ = 0x72b2;
+    *address++ = 0x0108;
+    *address++ = (*REG_DIPSW & 0x08) ? 0x30FF : 0x31FF;
     
     // Communication - Dip 2
-    *address = 0x0003;
-    address += 1;
-    *address = 0x72d2;
-    address += 1;
-    *address = 0x0108;
-    address += 1;
-    *address = (*REG_DIPSW & 0x10) ? 0x30FF : 0x31FF;
-    address += 1;
-    *address = 0x0003;
-    address += 1;
-    *address = 0x7412;
-    address += 1;
-    *address = 0x0108;
-    address += 1;        
+    *address++ = 0x0003;
+    *address++ = 0x72d2;
+    *address++ = 0x0108;
+    *address++ = (*REG_DIPSW & 0x10) ? 0x30FF : 0x31FF;
+    *address++ = 0x0003;
+    *address++ = 0x7412;
+    *address++ = 0x0108;
     i = (~(*REG_DIPSW >> 3)) & 0x03;
     for (uint8_t c = 0; bios_menu_communication_link[i][c] != '\0'; c++) {
         *(volatile uint8_t *)address = (bios_menu_communication_link[i][c]);
@@ -148,25 +110,17 @@ void update_bios_menu_hard_dips() {
         *(volatile uint8_t *)address = 0xFF;
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
     } else {
-        *address = 0xFFFF;
-        address += 1;
+        *address++ = 0xFFFF;
     }
 
     // Communication - Dip 3
-    *address = 0x0003;
-    address += 1;
-    *address = 0x72f2;
-    address += 1;
-    *address = 0x0108;
-    address += 1;
-    *address = (*REG_DIPSW & 0x20) ? 0x30FF : 0x31FF;
-    address += 1;
-    *address = 0x0003;
-    address += 1;
-    *address = 0x7392;
-    address += 1;
-    *address = 0x0108;
-    address += 1;        
+    *address++ = 0x0003;
+    *address++ = 0x72f2;
+    *address++ = 0x0108;
+    *address++ = (*REG_DIPSW & 0x20) ? 0x30FF : 0x31FF;
+    *address++ = 0x0003;
+    *address++ = 0x7392;
+    *address++ = 0x0108;
     i = (*REG_DIPSW & 0x20) ? 1 : 0;
     for (uint8_t c = 0; bios_menu_on_off[i][c] != '\0'; c++) {
         *(volatile uint8_t *)address = (bios_menu_on_off[i][c]);
@@ -176,25 +130,17 @@ void update_bios_menu_hard_dips() {
         *(volatile uint8_t *)address = 0xFF;
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
     } else {
-        *address = 0xFFFF;
-        address += 1;
+        *address++ = 0xFFFF;
     }
 
     // Free play
-    *address = 0x0003;
-    address += 1;
-    *address = 0x7314;
-    address += 1;
-    *address = 0x0108;
-    address += 1;        
-    *address = (*REG_DIPSW & 0x40) ? 0x30FF : 0x31FF;
-    address += 1;
-    *address = 0x0003;
-    address += 1;
-    *address = 0x7394;
-    address += 1;
-    *address = 0x0108;
-    address += 1;        
+    *address++ = 0x0003;
+    *address++ = 0x7314;
+    *address++ = 0x0108;
+    *address++ = (*REG_DIPSW & 0x40) ? 0x30FF : 0x31FF;
+    *address++ = 0x0003;
+    *address++ = 0x7394;
+    *address++ = 0x0108;
     i = *REG_DIPSW & 0x40 ? 1 : 0;
     for (uint8_t c = 0; bios_menu_on_off[i][c] != '\0'; c++) {
         *(volatile uint8_t *)address = (bios_menu_on_off[i][c]);
@@ -204,25 +150,17 @@ void update_bios_menu_hard_dips() {
         *(volatile uint8_t *)address = 0xFF;
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
     } else {
-        *address = 0xFFFF;
-        address += 1;
+        *address++ = 0xFFFF;
     }
 
     // Stop mode / Freeze
-    *address = 0x0003;
-    address += 1;
-    *address = 0x7336;
-    address += 1;
-    *address = 0x0108;
-    address += 1;
-    *address = (*REG_DIPSW & 0x80) ? 0x30FF : 0x31FF;
-    address += 1;
-    *address = 0x0003;
-    address += 1;
-    *address = 0x7396;
-    address += 1;
-    *address = 0x0108;
-    address += 1;        
+    *address++ = 0x0003;
+    *address++ = 0x7336;
+    *address++ = 0x0108;
+    *address++ = (*REG_DIPSW & 0x80) ? 0x30FF : 0x31FF;
+    *address++ = 0x0003;
+    *address++ = 0x7396;
+    *address++ = 0x0108;
     i = *REG_DIPSW & 0x80 ? 1 : 0;
     for (uint8_t c = 0; bios_menu_on_off[i][c] != '\0'; c++) {
         *(volatile uint8_t *)address = (bios_menu_on_off[i][c]);
@@ -232,13 +170,11 @@ void update_bios_menu_hard_dips() {
         *(volatile uint8_t *)address = 0xFF;
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
     } else {
-        *address = 0xFFFF;
-        address += 1;
+        *address++ = 0xFFFF;
     }
 
     // End
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
     *BIOS_MESS_POINT = (volatile uint32_t)address;
 
     *BIOS_MESS_BUSY = 0;
@@ -254,26 +190,17 @@ void show_bios_menu_soft_dips() {
     *BIOS_MESS_POINT = BIOS_MESS_BUFFER_PTR + sizeof(uint32_t);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
-    *address = 0x0000;
-    address++;
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
+    *address++ = 0x0000;
 
     for (uint8_t i = 0; i < *BRAM_SLOT_COUNT; i++) {
-        *address = 0x0005;
-        address++;
-        *address = 0x0002;
-        address++;
-        *address = 0x0108;
-        address++;
-        *address = 0x534c;
-        address++;
-        *address = 0x4f54;
-        address++;
-        *address = 0x2031 + i;
-        address++;
-        *address = 0x3A20;
-        address++;
+        *address++ = 0x0005;
+        *address++ = 0x0002;
+        *address++ = 0x0108;
+        *address++ = 0x534c;
+        *address++ = 0x4f54;
+        *address++ = 0x2031 + i;
+        *address++ = 0x3A20;
 
         uint16_t ngh = BRAM_NGH_BLOCK[i].ngh;
         uint16_t block_id = BRAM_NGH_BLOCK[i].block;
@@ -283,19 +210,15 @@ void show_bios_menu_soft_dips() {
                 *(volatile uint8_t *)address = game_name[c];
                 address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
             }
-            *address = 0xFFFF;
-            address++;
+            *address++ = 0xFFFF;
         } else {
-            *address = 0x4E2F;
-            address++;
-            *address = 0x41FF;
-            address++;
+            *address++ = 0x4E2F;
+            *address++ = 0x41FF;
         }
         *SERVICE_CURSOR_MAX += 1;
     }
 
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
     *BIOS_MESS_POINT = (volatile uint32_t)address;
 
     *BIOS_MESS_BUSY = 0;
@@ -304,48 +227,38 @@ void show_bios_menu_soft_dips() {
 void update_bios_menu_soft_dips() {
     *BIOS_MESS_BUSY = 1;
     uint8_t menu_items = *SERVICE_CURSOR_MAX;
-    _move_cursor(menu_items);
+    _move_cursor(menu_items, 0);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
-    *address = 0x0000;
-    address++;
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
+    *address++ = 0x0000;
 
-    *address = 0x0003;
-    address += 1;
-    *address = 0x70E5;
-    address += 1;        
+    *address++ = 0x0003;
+    *address++ = 0x70E5;
 
-    for (uint8_t i = 0; i < menu_items; i++) {
+    for (int8_t i = 0; i < menu_items; i++) {
         if (i != *SERVICE_CURSOR) {
-            *address = 0x0108;
-            address++;
-            *address = 0x20FF;  // Space (overwrite arrow)
-            address += 1;
+            *address++ = 0x0108;
+            *address++ = 0x20FF;  // Space (overwrite arrow)
         } else {
-            *address = 0x1108;
-            address += 1;
-            *address = 0x11FF;  // Arrow
-            address += 1;
+            *address++ = 0x1108;
+            *address++ = 0x11FF;  // Arrow
         }
         if (menu_items - 1 != i) {
-            *address = 0x0005;
-            address += 1;
-            *address = 0x0002;
-            address += 1;
+            *address++ = 0x0005;
+            *address++ = 0x0002;
         }
     }
 
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
     *BIOS_MESS_POINT = (volatile uint32_t)address;
 
-    *BIOS_MESS_BUSY = 0;    
+    *BIOS_MESS_BUSY = 0;
 }
 
 void show_bios_menu_soft_dips_cabinet() {
     *(uint32_t *)0x400002 = 0x0EEE0000; // Palette 0
+    *(uint32_t *)0x400022 = 0x0E000000; // Palette 1
     *BIOS_MESS_BUSY = 1;
 
     *(volatile uint32_t *) BIOS_MESS_BUFFER = (uint32_t)bios_menu_soft_dips_cabinet;
@@ -355,7 +268,194 @@ void show_bios_menu_soft_dips_cabinet() {
 }
 
 void update_bios_menu_soft_dips_cabinet() {
+    *BIOS_MESS_BUSY = 1;
+    uint8_t menu_items = 5;
+    // TODO: Make the side_items-value dynamic. d = [1 2 1 2 2]; d[*SERVICE_CURSOR]
+    _move_cursor(menu_items, 1);
 
+    volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
+    *address++ = 0x0000;
+    *address++ = 0x0000;
+
+    *address++ = 0x0003;
+    *address++ = 0x7068;
+
+    for (int8_t i = 0; i < menu_items; i++) {
+        if (i != *SERVICE_CURSOR) {
+            *address++ = 0x0108;
+            *address++ = 0x20FF;  // Space (overwrite arrow)
+        } else {
+            *address++ = 0x1108;
+            *address++ = 0x11FF;  // Arrow
+        }
+        if (menu_items - 1 != i) {
+            *address++ = 0x0005;
+            *address++ = 0x0002;
+        }
+    }
+
+    // If 'A' button is pressed
+    if ((*BIOS_P1CHANGE & 0x10) != 0) {
+        unlock_backup_ram();
+        if (0 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 0) {
+            if (*BRAM_DIP_COIN_P1_NEED >= 9) {
+                *BRAM_DIP_COIN_P1_NEED = 1;
+            } else {
+                *BRAM_DIP_COIN_P1_NEED += 1;
+            }
+        } else if (0 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 1) {
+            if (*BRAM_DIP_COIN_P1_GIVE >= 9) {
+                *BRAM_DIP_COIN_P1_GIVE = 1;
+            } else {
+                *BRAM_DIP_COIN_P1_GIVE += 1;
+            }
+        } else if (1 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 0) {
+            if (*BRAM_DIP_COIN_P2_NEED >= 9) {
+                *BRAM_DIP_COIN_P2_NEED = 1;
+            } else {
+                *BRAM_DIP_COIN_P2_NEED += 1;
+            }
+        } else if (1 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 1) {
+            if (*BRAM_DIP_COIN_P2_GIVE >= 9) {
+                *BRAM_DIP_COIN_P2_GIVE = 1;
+            } else {
+                *BRAM_DIP_COIN_P2_GIVE += 1;
+            }
+        } else if (2 == *SERVICE_CURSOR) {
+            *BRAM_DIP_GAME_SELECT_FREE ^= 1;
+        } else if (3 == *SERVICE_CURSOR) {
+            uint8_t seconds = from_bcd8(*BRAM_DIP_COMPULSION_TIMER);
+            if (seconds >= 60) {
+                seconds = 0;
+                *BRAM_DIP_GAME_START_FORCE ^= 1;
+            } else {
+                if (seconds == 0) {
+                    *BRAM_DIP_GAME_START_FORCE ^= 1;
+                }
+                seconds++;
+            }
+            *BRAM_DIP_COMPULSION_TIMER = to_bcd8(seconds);
+        } else if (4 == *SERVICE_CURSOR) {
+            *BRAM_DIP_DEMO_SOUND ^= 1;
+        }
+        lock_backup_ram();
+    // If 'B' button is pressed
+    } else if ((*BIOS_P1CHANGE & 0x20) != 0) {
+        unlock_backup_ram();
+        if (0 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 0) {
+            if (*BRAM_DIP_COIN_P1_NEED <= 1) {
+                *BRAM_DIP_COIN_P1_NEED = 9;
+            } else {
+                *BRAM_DIP_COIN_P1_NEED -= 1;
+            }
+        } else if (0 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 1) {
+            if (*BRAM_DIP_COIN_P1_GIVE <= 1) {
+                *BRAM_DIP_COIN_P1_GIVE = 9;
+            } else {
+                *BRAM_DIP_COIN_P1_GIVE -= 1;
+            }
+        } else if (1 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 0) {
+            if (*BRAM_DIP_COIN_P2_NEED <= 1) {
+                *BRAM_DIP_COIN_P2_NEED = 9;
+            } else {
+                *BRAM_DIP_COIN_P2_NEED -= 1;
+            }
+        } else if (1 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 1) {
+            if (*BRAM_DIP_COIN_P2_GIVE <= 1) {
+                *BRAM_DIP_COIN_P2_GIVE = 9;
+            } else {
+                *BRAM_DIP_COIN_P2_GIVE -= 1;
+            }
+        } else if (2 == *SERVICE_CURSOR) {
+            *BRAM_DIP_GAME_SELECT_FREE ^= 1;
+        } else if (3 == *SERVICE_CURSOR) {
+            uint8_t seconds = from_bcd8(*BRAM_DIP_COMPULSION_TIMER);
+            if (seconds == 0) {
+                seconds = 60;
+                *BRAM_DIP_GAME_START_FORCE ^= 1;
+            } else {
+                if (seconds == 1) {
+                    *BRAM_DIP_GAME_START_FORCE ^= 1;
+                }
+                seconds--;
+            }
+            *BRAM_DIP_COMPULSION_TIMER = to_bcd8(seconds);
+        } else if (4 == *SERVICE_CURSOR) {
+            *BRAM_DIP_DEMO_SOUND ^= 1;
+        }
+        lock_backup_ram();
+    }
+
+    // Coin1
+    *address++ = 0x0003;
+    *address++ = 0x7248;
+    *address++ = ((*SERVICE_CURSOR == 0 && *SERVICE_CURSOR_SIDEWAYS == 0) ? 0x1108 : 0x0108);
+    *address++ = ((uint16_t)(*BRAM_DIP_COIN_P1_NEED + 0x30) << 8) | 0x00FF;
+    *address++ = 0x0003;
+    *address++ = 0x7348;
+    *address++ = ((*SERVICE_CURSOR == 0 && *SERVICE_CURSOR_SIDEWAYS == 1) ? 0x1108 : 0x0108);
+    *address++ = ((uint16_t)(*BRAM_DIP_COIN_P1_GIVE + 0x30) << 8) | 0x00FF;
+    // Pural 's'
+    *address++ = 0x0003;
+    *address++ = 0x72e8;
+    *address++ = 0x0108;
+    if (*BRAM_DIP_COIN_P1_NEED > 1) {
+        *address++ = 0x53FF;
+    } else {
+        *address++ = 0x20FF;
+    }
+    *address++ = 0x0003;
+    *address++ = 0x7428;
+    *address++ = 0x0108;
+    if (*BRAM_DIP_COIN_P1_GIVE > 1) {
+        *address++ = 0x53FF;
+    } else {
+        *address++ = 0x20FF;
+    }
+
+    // Coin2
+    *address++ = 0x0003;
+    *address++ = 0x724b;
+    *address++ = ((*SERVICE_CURSOR == 1 && *SERVICE_CURSOR_SIDEWAYS == 0) ? 0x1108 : 0x0108);
+    *address++ = ((uint16_t)(*BRAM_DIP_COIN_P2_NEED + 0x30) << 8) | 0x00FF;
+    *address++ = 0x0003;
+    *address++ = 0x734b;
+    *address++ = ((*SERVICE_CURSOR == 1 && *SERVICE_CURSOR_SIDEWAYS == 1) ? 0x1108 : 0x0108);
+    *address++ = ((uint16_t)(*BRAM_DIP_COIN_P2_GIVE + 0x30) << 8) | 0x00FF;
+    // Pural 's'
+    *address++ = 0x0003;
+    *address++ = 0x72eb;
+    *address++ = 0x0108;
+    if (*BRAM_DIP_COIN_P2_NEED > 1) {
+        *address++ = 0x53FF;
+    } else {
+        *address++ = 0x20FF;
+    }
+    *address++ = 0x0003;
+    *address++ = 0x742b;
+    *address++ = 0x0108;
+    if (*BRAM_DIP_COIN_P2_GIVE > 1) {
+        *address++ = 0x53FF;
+    } else {
+        *address++ = 0x20FF;
+    }
+
+    // Game select
+    address = _add_string(address, (*SERVICE_CURSOR == 2 ? 1 : 0), 0x724e, bios_menu_soft_dips_cabinet_game_select[*BRAM_DIP_GAME_SELECT_FREE]);
+
+    // Game start (compulsion)
+    address = _add_string(address, (*BRAM_DIP_GAME_START_FORCE == 1 ? 1 : 0), 0x7391, bios_menu_soft_dips_cabinet_game_start[*BRAM_DIP_GAME_START_FORCE]);
+    if (0 == *BRAM_DIP_GAME_START_FORCE) {
+        address = _add_large_char(address, (*SERVICE_CURSOR == 3 ? 1 : 0), 0x7391, *BRAM_DIP_COMPULSION_TIMER);
+    }
+
+    // Demo sound
+    address = _add_string(address, (*SERVICE_CURSOR == 4 ? 1 : 0), 0x7254, bios_menu_soft_dips_cabinet_demo_sound[*BRAM_DIP_DEMO_SOUND]);
+
+    *address++ = 0x0000;
+    *BIOS_MESS_POINT = (volatile uint32_t)address;
+
+    *BIOS_MESS_BUSY = 0;
 }
 
 void show_bios_menu_soft_dips_game() {
@@ -509,8 +609,8 @@ void show_bios_menu_soft_dips_game() {
 
 void update_bios_menu_soft_dips_game() {
     *BIOS_MESS_BUSY = 1;
-    uint8_t menu_items = *SERVICE_CURSOR_MAX;
-    _move_cursor(menu_items);
+    int8_t menu_items = *SERVICE_CURSOR_MAX;
+    _move_cursor(menu_items, 0);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
     *address = 0x0000;
@@ -519,27 +619,27 @@ void update_bios_menu_soft_dips_game() {
     address++;
 
     *address = 0x0003;
-    address += 1;
+    address++;
     *address = 0x70E8;
-    address += 1;        
+    address++;        
 
-    for (uint8_t i = 0; i < menu_items; i++) {
+    for (int8_t i = 0; i < menu_items; i++) {
         if (i != *SERVICE_CURSOR) {
             *address = 0x0108;
             address++;
             *address = 0x20FF;  // Space (overwrite arrow)
-            address += 1;
+            address++;
         } else {
             *address = 0x1108;
-            address += 1;
+            address++;
             *address = 0x11FF;  // Arrow
-            address += 1;
+            address++;
         }
         if (menu_items - 1 != i) {
             *address = 0x0005;
-            address += 1;
+            address++;
             *address = 0x0002;
-            address += 1;
+            address++;
         }
     }
 

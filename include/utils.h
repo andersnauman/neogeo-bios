@@ -13,6 +13,7 @@ void wait_for_z80();
 void reset_palettes();
 void reset_fix_layer();
 void reset_sprites();
+void pause_system();
 void reset_system();
 void *memset(void *ptr, int value, size_t num);
 void *memcpy(void *dest, const void *src, size_t num);

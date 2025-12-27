@@ -15,9 +15,10 @@ void show_bios_menu() {
     reset_palettes();
 
     uint8_t menu = MENU_BIOS_MAIN;
-    uint8_t cursor_sp = 0;
-    uint8_t cursor_stack[4] = {0};      // Previous cursor stack. Max depth of the menu system (4).
+    int8_t cursor_sp = 0;
+    int8_t cursor_stack[4] = {0};      // Previous cursor stack. Max depth of the menu system (4).
     *SERVICE_CURSOR = 0;
+    *SERVICE_CURSOR_SIDEWAYS = 0;
 
     while(1) {
         if (menu == MENU_BIOS_MAIN) {
@@ -44,6 +45,7 @@ void show_bios_menu() {
                     if (cursor_sp < sizeof(cursor_stack)) {
                         cursor_stack[cursor_sp++] = *SERVICE_CURSOR;
                         *SERVICE_CURSOR = 0;
+                        *SERVICE_CURSOR_SIDEWAYS = 0;
                     }
                 }
             } else if (menu == MENU_BIOS_HARD_DIPS) {
@@ -64,6 +66,7 @@ void show_bios_menu() {
                     if (cursor_sp < sizeof(cursor_stack)) {
                         cursor_stack[cursor_sp++] = *SERVICE_CURSOR;
                         *SERVICE_CURSOR = 0;
+                        *SERVICE_CURSOR_SIDEWAYS = 0;
                     }
                 } else if (((*BIOS_P1CHANGE) & MENU_BUTTON_BACKWARD) != 0) {
                     menu = MENU_BIOS_MAIN;
@@ -130,8 +133,8 @@ void show_bios_menu_service() {
 
 void update_bios_menu_service() {
     *BIOS_MESS_BUSY = 1;
-    uint8_t menu_items = 7;
-    _move_cursor(menu_items);
+    int8_t menu_items = 7;
+    _move_cursor(menu_items, 0);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
     *address = 0x0000;
@@ -144,7 +147,7 @@ void update_bios_menu_service() {
     *address = 0x70E5;
     address += 1;        
 
-    for (uint8_t i = 0; i < menu_items; i++) {
+    for (int8_t i = 0; i < menu_items; i++) {
         if (i != *SERVICE_CURSOR) {
             *address = 0x0108;
             address++;
@@ -219,38 +222,68 @@ void show_bios_hardware_test() {
     }
 }
 
+// TODO: Rename function to match a printout of BCD
 volatile uint16_t * _add_large_char(volatile uint16_t *address, uint8_t selected, uint16_t position, uint16_t value) {
-    *address = 0x0003;
-    address++;
-    *address = position;
-    address++;
+    *address++ = 0x0003;
+    *address++ = position;
     if (selected == 1) {    
-        *address = 0x1108;
+        *address++ = 0x1108;
     } else {
-        *address = 0x0108;
+        *address++ = 0x0108;
     }
-    address++;
     uint8_t upper = (value >> 4) & 0x0F;
     uint8_t lower = value & 0x0F;
-    *address = ((upper + 0x30) << 8) | (lower + 0x30);
-    address++;
-    *address = 0xFFFF;
-    address++;
+    *address++ = ((upper + 0x30) << 8) | (lower + 0x30);
+    *address++ = 0xFFFF;
     return address;
 }
 
-void _move_cursor(uint8_t max_menu_items) {
+volatile uint16_t * _add_string(volatile uint16_t *address, uint8_t selected, uint16_t position, const char *string) {
+    *address++ = 0x0003;
+    *address++ = position;
+    if (selected == 1) {
+        *address++ = 0x1108;
+    } else {
+        *address++ = 0x0108;
+    }
+    for (uint8_t c = 0; string[c] != '\0'; c++) {
+        *(volatile uint8_t *)address = (string[c]);
+        address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
+    }
+    if (((uint32_t)address & 1) != 0 ) {
+        *(volatile uint8_t *)address = 0xFF;
+        address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
+    } else {
+        *address++ = 0xFFFF;
+    }
+    return address;
+}
+
+// Items counted from 0
+void _move_cursor(int8_t menu_items, int8_t side_items) {
     // Menu "go-up"
     if ((*BIOS_P1CHANGE & 0x1) != 0) {
-        *SERVICE_CURSOR -= 1;
-        if (*SERVICE_CURSOR < 0) {
-            *SERVICE_CURSOR = max_menu_items - 1;
+        if (*SERVICE_CURSOR <= 0) {
+            *SERVICE_CURSOR = menu_items - 1;
+        } else {
+            *SERVICE_CURSOR -= 1;
         }
     // Menu "go-down"
     } else if ((*BIOS_P1CHANGE & 0x2) != 0) {
-        *SERVICE_CURSOR += 1;
-        if (*SERVICE_CURSOR > (max_menu_items - 1)) {
+        if (*SERVICE_CURSOR >= (menu_items - 1)) {
             *SERVICE_CURSOR = 0;
+        } else {
+            *SERVICE_CURSOR += 1;
+        }
+    // Menu "go-left"
+    } else if ((*BIOS_P1CHANGE & 0x4) != 0) {
+        if (*SERVICE_CURSOR_SIDEWAYS > 0) {
+            *SERVICE_CURSOR_SIDEWAYS -= 1;
+        }
+    // Menu "go-right"
+    } else if ((*BIOS_P1CHANGE & 0x8) != 0) {
+        if (*SERVICE_CURSOR_SIDEWAYS < side_items) {
+            *SERVICE_CURSOR_SIDEWAYS += 1;
         }
     }
 }

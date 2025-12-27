@@ -19,7 +19,6 @@ void test_led();
 void test_memory_card();
 void test_palette_ram();
 void test_video_ram();
-//void test_work_ram();
 void test_sound();
 void test_rtc();
 
@@ -29,7 +28,7 @@ void _convert_hex_to_fix_ascii(uint8_t input, uint8_t *output_hi, uint8_t *outpu
 #include "bios.h"
 
 // Only in header because of the static inline.
-// Requirement to be able to write over the stack
+// Required to be able to overwrite the stack
 static inline void test_work_ram() {
     // Work RAM ($100000-$10FFFF)
     uint16_t value = 0;
@@ -50,15 +49,7 @@ static inline void test_work_ram() {
         if (WORK_RAM[offset] != 0xAAAA) {
             print_error_msg(BIOS_ERROR_WORK_RAM, 0x100000 + i, 0xAAAA, WORK_RAM[offset]);
         }
-        // TODO: This is ugly. Make it more precise and use SP save + jmp as the original code did!
         WORK_RAM[offset] = 0x0000;
-        /*
-        if ((i < 0xF250) || (i >= 0xF300)) {
-            WORK_RAM[offset] = 0x0000;
-        } else {
-            WORK_RAM[offset] = value;
-        }
-        */
     }
     __asm__ volatile ("move.l #0x10F300, %sp");
 };
@@ -67,6 +58,11 @@ static const char _backup_ram_str[] = "NEO-GEO ";
 static const char _memory_card_str[] = "SNK ROM ";
 static const char _palette_test_str[] = "TESTING PALETTE";
 
+static const uint16_t work_ram_test[] = {
+    0x0003, 0x71ce,
+    0x0108, 0x574f, 0x524b, 0x2052, 0x414d, 0x2054, 0x4553, 0x54ff,
+    0x0000
+};
 static const uint16_t work_ram_error[] = {
     0x0001, 0xf0ff,
     0x2002,
@@ -77,7 +73,6 @@ static const uint16_t work_ram_error[] = {
     0x0007, 0x4144, 0x4452, 0x4553, 0x5320, 0x2020, 0x5752, 0x4954, 0x4520, 0x5245, 0x4144, 0xffff,
     0x0000,
 };
-
 static const uint16_t backup_ram_error[] = {
     0x0001, 0xf0ff,
     0x2002,

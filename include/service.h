@@ -5,6 +5,7 @@
 
 #define SERVICE_CURSOR          ((volatile int8_t *)  0x10FCDA)
 #define SERVICE_CURSOR_MAX      ((volatile uint8_t *) 0x10FCDB)
+#define SERVICE_CURSOR_SIDEWAYS ((volatile int8_t *)  0x10FCDC)
 #define SERVICE_CALENDAR_CURSOR ((volatile uint8_t *) 0x10FCDA)
 #define SERVICE_LED_MARQUEE     ((volatile uint8_t *) 0x10FCDA)
 #define SERVICE_LED_COIN        ((volatile uint8_t *) 0x10FCDE)
@@ -54,7 +55,8 @@ void show_bios_hardware_test();
 
 // Local service functions
 volatile uint16_t * _add_large_char(volatile uint16_t *address, uint8_t selected, uint16_t position, uint16_t value);
-void _move_cursor(uint8_t max_menu_items);
+volatile uint16_t * _add_string(volatile uint16_t *address, uint8_t selected, uint16_t position, const char *string);
+void _move_cursor(int8_t menu_items, int8_t side_items);
 
 static const uint16_t bios_menu [] = {
     0x0003, 0x7145, 

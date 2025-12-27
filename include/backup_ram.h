@@ -24,8 +24,8 @@
 #define BRAM_DIP_0x3F                       ((volatile uint8_t *)0xD0003F)  // Mystery 0x3F, never used in original BIOS
 #define BRAM_DIP_0x40                       ((volatile uint8_t *)0xD00040)  // Mystery 0x40, never used in original BIOS
 #define BRAM_DIP_0x41                       ((volatile uint8_t *)0xD00041)  // Mystery 0x41, never used in original BIOS
-#define BRAM_DIP_GAME_SELECT_FREE           ((volatile uint8_t *)0xD00042)  // Allowed to change game when 0 = credit is present, 1 = Any condition
-#define BRAM_DIP_GAME_START_FORCE           ((volatile uint8_t *)0xD00043)  // 0 = None, 1 = Compulsion is enforced
+#define BRAM_DIP_GAME_SELECT_FREE           ((volatile uint8_t *)0xD00042)  // Allowed to change game when 0 = credit is present, 1 = free selection
+#define BRAM_DIP_GAME_START_FORCE           ((volatile uint8_t *)0xD00043)  // 0 = Enforced compulsion, 1 = Without compulsion
 #define BRAM_DIP_COMPULSION_TIMER           ((volatile uint8_t *)0xD00044)  // Seconds (BCD) between coin & start
 #define BRAM_DIP_COMPULSION_FRAME_TIMER     ((volatile uint8_t *)0xD00045)  // Compulsion frame counter. Used by game
 #define BRAM_DIP_DEMO_SOUND                 ((volatile uint8_t *)0xD00046)  // 0 = Game setting, 1 = No demo sound

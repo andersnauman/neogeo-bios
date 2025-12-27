@@ -52,6 +52,7 @@ void system_return(void) {
         }
         if (8 == *BRAM_SLOT_CURSOR) {
             // Check if service-button is pressed
+            // TODO: In the original BIOS, there is also a service-button-test in system_io().
             uint8_t service_button = ((~(*REG_STATUS_A)) & 0x4) >> 2;
             uint8_t dipsw_settings = (~(*REG_DIPSW)) & 0x1;
             if (service_button || dipsw_settings) {
@@ -104,6 +105,7 @@ void system_return(void) {
 
         load_game_data();
         *BIOS_USER_MODE = 1;
+
         // Ignore eyecatcher when slot is changed
         *BIOS_USER_REQUEST = USER_REQUEST_DEMO;
 
@@ -144,8 +146,7 @@ void system_io(void) {
             // Check if PLAYER_START have removed any flags.
             if (0 < *BIOS_START_FLAG) {
                 *BIOS_COMPULSION_TIMER = 0;
-                *BIOS_FRAME_SKIP = 1;           // Delay fix for something?
-                // *BIOS_SYSRET_STATUS = 0x03;     // Game change this value to 2 after compulsion ends
+                *BIOS_FRAME_SKIP = 1;           // Delay-fix for something?
             }
 
             // Check if 'select' is pressed to change the game on a multislot

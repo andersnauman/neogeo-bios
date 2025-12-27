@@ -107,7 +107,7 @@ Game tells the BIOS where it is:
 #define BIOS_P1STATUS        ((volatile uint8_t *) 0x10FD94)
 #define BIOS_P1PREVIOUS      ((volatile uint8_t *) 0x10FD95)
 #define BIOS_P1CURRENT       ((volatile uint8_t *) 0x10FD96)
-#define BIOS_P1CHANGE        ((volatile uint8_t *) 0x10FD97)
+#define BIOS_P1CHANGE        ((volatile uint8_t *) 0x10FD97)    // DCBA Right Left Down Up (positive logic)
 #define BIOS_P1REPEAT        ((volatile uint8_t *) 0x10FD98)
 #define BIOS_P1TIMER         ((volatile int8_t *)  0x10FD99)
 
@@ -139,7 +139,7 @@ Game tells the BIOS where it is:
 #define BIOS_P2CREDIT_DEC    ((volatile uint8_t *) 0x10FDB1)
 #define BIOS_P3CREDIT_DEC    ((volatile uint8_t *) 0x10FDB2)
 #define BIOS_P4CREDIT_DEC    ((volatile uint8_t *) 0x10FDB3)
-#define BIOS_START_FLAG      ((volatile uint8_t *) 0x10FDB4)
+#define BIOS_START_FLAG      ((volatile uint8_t *) 0x10FDB4)    // Signal and control to PLAYER_START-rutine
 
 #define BIOS_PLAYER_MOD_START   ((volatile uint32_t *) 0x10FDBA)
 #define BIOS_PLAYER_MOD1_START  ((volatile uint8_t *)  0x10FDBA)
@@ -226,7 +226,7 @@ Game tells the BIOS where it is:
 // Jump rutines
 typedef void (*subr_fn_t)(void);
 #define SUBR_CART_USER           ((subr_fn_t)0x000122)    // This sub-function is expected to call system_return() instead of returning
-#define SUBR_CART_PLAYER_START   ((subr_fn_t)0x000128)    // This sub-function is expected to return(RTS) as normal
+#define SUBR_CART_PLAYER_START   ((subr_fn_t)0x000128)    // This sub-function is expected to return(RTS) as normal, with the BIOS_START_FLAG updated with 'accepted' player.
 #define SUBR_CART_DEMO_END       ((subr_fn_t)0x00012E)    // This sub-function is expected to return(RTS) as normal
 #define SUBR_CART_COIN_SOUND     ((subr_fn_t)0x000134)    // This sub-function is expected to return(RTS) as normal
 
