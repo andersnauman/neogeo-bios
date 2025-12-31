@@ -99,12 +99,14 @@ void setup_backup_ram() {
                 *BRAM_FIRST_PLAYABLE_SLOT = slot;
             }
 
-            if (!validate_security_code()) {
-                continue;
-            }
+            // Original BIOS check for these strings. Will ignore it for now
             // "NEO-GEO"
             // "NEO-CLN"
             // 4E 00 4F 00 47 00 4F (N \0 O \0 G \0 O)
+
+            if (!validate_security_code()) {
+                continue;
+            }
 
             BIOS_NGH_BLOCK[slot] = (SlotEntry){
                 .ngh = *ROM_NGH_NUMBER,

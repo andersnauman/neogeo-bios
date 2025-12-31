@@ -24,7 +24,7 @@
 #define NEW_BIOS_SECOND         ((volatile uint8_t *) 0x10FCE8)
 
 #define MENU_BUTTON_FORWARD         0x10
-#define MENU_BUTTON_BACKWARD        0x20
+#define MENU_BUTTON_BACKWARD        0x40
 
 // BIOS menu
 #define MENU_BIOS_MAIN              8

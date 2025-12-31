@@ -168,11 +168,9 @@ void system_io(void) {
 
         lock_backup_ram();
     }
-/*
-    if (menu_hotkey_pressed()) {
-        menu_toggle();
-    }
-*/  
+
+    check_menu_hotkey();
+
     return;
 }
 

@@ -5,18 +5,7 @@
 
 #include "game_menu.h"
 
-void game_menu(void) {
-    if (*BIOS_GAME_MENU != 1) {
-        return;
-    }
-    if (*BIOS_GAME_MENU_TOGGLE == 1) {
-        menu_init();
-        *BIOS_GAME_MENU_TOGGLE = 0;
-    }    
-    menu_update();
-}
-
-void menu_init() {
+void menu_enter() {
     //*REG_SHADOW = 0;
     *BIOS_GAME_PALETTE_1 = *(uint32_t *)0x400020;
     uint16_t pos = BIOS_GAME_MENU_START_POSITION;
@@ -29,7 +18,7 @@ void menu_init() {
     }
 }
 
-void menu_shutdown() {
+void menu_exit() {
     //*REG_NOSHADOW = 0;
     *(uint32_t *)0x400020 = *BIOS_GAME_PALETTE_1;
     uint16_t pos = BIOS_GAME_MENU_START_POSITION;
@@ -52,22 +41,14 @@ void menu_update() {
     *BIOS_MESS_POINT = BIOS_MESS_BUFFER_PTR + sizeof(uint32_t);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
-    *address = 0x0000;
-    address++;
-    *address = 0x0000;
-    address++;
-    *address = 0x0001;
-    address++;
-    *address = 0x10ff;  // Palette 1
-    address++;
-    *address = 0x2002;  // Increase each write with a column
-    address++;
-    *address = 0x0003;
-    address++;
-    *address = BIOS_GAME_MENU_START_POSITION + 32 + 1;    // Add one column and one row
-    address++;
-    *address = 0x0007;
-    address++;
+    *address++ = 0x0000;
+    *address++ = 0x0000;
+    *address++ = 0x0001;
+    *address++ = 0x10ff;  // Palette 1
+    *address++ = 0x2002;  // Increase each write with a column
+    *address++ = 0x0003;
+    *address++ = BIOS_GAME_MENU_START_POSITION + 32 + 1;    // Add one column and one row
+    *address++ = 0x0007;
 
     uint8_t block = find_game_data_block(*ROM_NGH_NUMBER);
 
@@ -75,15 +56,11 @@ void menu_update() {
         *(volatile uint8_t *)address = BRAM_GAME_NAME(block)[i];
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
     }
-    *address = 0xFFFF;
-    address++;
+    *address++ = 0xFFFF;
 
-    *address = 0x0003;
-    address++;
-    *address = BIOS_GAME_MENU_START_POSITION + 32 + 2;    // Add one column and two rows
-    address++;
-    *address = 0x0007;
-    address++;
+    *address++ = 0x0003;
+    *address++ = BIOS_GAME_MENU_START_POSITION + 32 + 2;    // Add one column and two rows
+    *address++ = 0x0007;
     // Insert game name and dip settings
     uint8_t region = *SROM_COUNTRY_CODE;    
     uint32_t dips_addr = ROM_SOFTDIP_TABLE[region];
@@ -94,37 +71,39 @@ void menu_update() {
         address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
         dips++; 
     }
+    *address++ = 0xFFFF;
 
-    *address = 0xFFFF;
-    address++;
-
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
     *BIOS_MESS_POINT = (volatile uint32_t)address;
 
     *BIOS_MESS_BUSY = 0;    
 }
 
 void menu_toggle() {
-    if (*BIOS_GAME_MENU != 1) {
-        *BIOS_GAME_MENU_TOGGLE = 1;
-        *BIOS_GAME_MENU = 1;
+    if (*BIOS_GAME_MENU == GAME_MENU_HIDDEN) {
+        menu_enter();
+        *BIOS_GAME_MENU = GAME_MENU_VISIBLE;
+
         *REG_SWPBIOS = 0;
         *BIOS_GAME_LSPCMODE = *REG_LSPCMODE;
-        *REG_LSPCMODE  = (uint16_t)(*BIOS_GAME_LSPCMODE & ~LSPC_TIMER_EN);
+        *REG_LSPCMODE = (uint16_t)(*BIOS_GAME_LSPCMODE & ~LSPC_TIMER_EN);
     } else {
-        *BIOS_GAME_MENU_TOGGLE = 0;
-        menu_shutdown();
+        menu_exit();
+        *BIOS_GAME_MENU = GAME_MENU_HIDDEN;
+
         *REG_LSPCMODE = *BIOS_GAME_LSPCMODE;
         *REG_SWPROM = 0;
-        *BIOS_GAME_MENU = 0;
-    }    
+    }
 }
 
-uint8_t menu_hotkey_pressed() {
-    // P1 select
-    if (((*BIOS_STATCHANGE_RAW) & 0x02) != 0) {
-        return 1;
+void check_menu_hotkey() {
+    // Ignore hotkey if we are not in a game
+    if (0xFF == *BIOS_SWPMODE) {
+        return;
     }
-    return 0;
+
+    // Hotkey for menu, p1 start + p1 select
+    if (((*BIOS_STATCHANGE_RAW) & P1_START) != 0 && ((*BIOS_STATCHANGE_RAW) & P1_SELECT) != 0) {
+        menu_toggle();
+    }
 }

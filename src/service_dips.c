@@ -295,7 +295,7 @@ void update_bios_menu_soft_dips_cabinet() {
     }
 
     // If 'A' button is pressed
-    if ((*BIOS_P1CHANGE & 0x10) != 0) {
+    if ((*BIOS_P1CHANGE & A_BUTTON) != 0) {
         unlock_backup_ram();
         if (0 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 0) {
             if (*BRAM_DIP_COIN_P1_NEED >= 9) {
@@ -340,7 +340,7 @@ void update_bios_menu_soft_dips_cabinet() {
         }
         lock_backup_ram();
     // If 'B' button is pressed
-    } else if ((*BIOS_P1CHANGE & 0x20) != 0) {
+    } else if ((*BIOS_P1CHANGE & B_BUTTON) != 0) {
         unlock_backup_ram();
         if (0 == *SERVICE_CURSOR && *SERVICE_CURSOR_SIDEWAYS == 0) {
             if (*BRAM_DIP_COIN_P1_NEED <= 1) {

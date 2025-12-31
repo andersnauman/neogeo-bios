@@ -102,44 +102,51 @@ BIOS asks game for this state when calling USER():
 Game tells the BIOS where it is:
 0:Init/Boot animation, 1:Title/Demo, 2:Game
 */
-#define BIOS_USER_MODE       ((volatile uint8_t *) 0x10FDAF)
+#define BIOS_USER_MODE          ((volatile uint8_t *) 0x10FDAF)
 
-#define BIOS_P1STATUS        ((volatile uint8_t *) 0x10FD94)
-#define BIOS_P1PREVIOUS      ((volatile uint8_t *) 0x10FD95)
-#define BIOS_P1CURRENT       ((volatile uint8_t *) 0x10FD96)
-#define BIOS_P1CHANGE        ((volatile uint8_t *) 0x10FD97)    // DCBA Right Left Down Up (positive logic)
-#define BIOS_P1REPEAT        ((volatile uint8_t *) 0x10FD98)
-#define BIOS_P1TIMER         ((volatile int8_t *)  0x10FD99)
+// Arcade panel / Joypad registers
+#define A_BUTTON                0x10
+#define B_BUTTON                0x20
+#define C_BUTTON                0x40
+#define D_BUTTON                0x80
+#define P1_START                0x01    //select P4, Start P4, Select P3, Start P3, Select P2, Start P2, Select P1, Start P1
+#define P1_SELECT               0x02
+#define BIOS_P1STATUS           ((volatile uint8_t *) 0x10FD94)
+#define BIOS_P1PREVIOUS         ((volatile uint8_t *) 0x10FD95)
+#define BIOS_P1CURRENT          ((volatile uint8_t *) 0x10FD96)
+#define BIOS_P1CHANGE           ((volatile uint8_t *) 0x10FD97)    // DCBA Right Left Down Up (positive logic)
+#define BIOS_P1REPEAT           ((volatile uint8_t *) 0x10FD98)
+#define BIOS_P1TIMER            ((volatile int8_t *)  0x10FD99)
 
-#define BIOS_P2STATUS        ((volatile uint8_t *) 0x10FD9A)
-#define BIOS_P2PREVIOUS      ((volatile uint8_t *) 0x10FD9B)
-#define BIOS_P2CURRENT       ((volatile uint8_t *) 0x10FD9C)
-#define BIOS_P2CHANGE        ((volatile uint8_t *) 0x10FD9D)
-#define BIOS_P2REPEAT        ((volatile uint8_t *) 0x10FD9E)
-#define BIOS_P2TIMER         ((volatile uint8_t *) 0x10FD9F)
+#define BIOS_P2STATUS           ((volatile uint8_t *) 0x10FD9A)
+#define BIOS_P2PREVIOUS         ((volatile uint8_t *) 0x10FD9B)
+#define BIOS_P2CURRENT          ((volatile uint8_t *) 0x10FD9C)
+#define BIOS_P2CHANGE           ((volatile uint8_t *) 0x10FD9D)
+#define BIOS_P2REPEAT           ((volatile uint8_t *) 0x10FD9E)
+#define BIOS_P2TIMER            ((volatile uint8_t *) 0x10FD9F)
 
-#define BIOS_P3STATUS        ((volatile uint8_t *) 0x10FDA0)
-#define BIOS_P3PREVIOUS      ((volatile uint8_t *) 0x10FDA1)
-#define BIOS_P3CURRENT       ((volatile uint8_t *) 0x10FDA2)
-#define BIOS_P3CHANGE        ((volatile uint8_t *) 0x10FDA3)
-#define BIOS_P3REPEAT        ((volatile uint8_t *) 0x10FDA4)
-#define BIOS_P3TIMER         ((volatile uint8_t *) 0x10FDA5)
+#define BIOS_P3STATUS           ((volatile uint8_t *) 0x10FDA0)
+#define BIOS_P3PREVIOUS         ((volatile uint8_t *) 0x10FDA1)
+#define BIOS_P3CURRENT          ((volatile uint8_t *) 0x10FDA2)
+#define BIOS_P3CHANGE           ((volatile uint8_t *) 0x10FDA3)
+#define BIOS_P3REPEAT           ((volatile uint8_t *) 0x10FDA4)
+#define BIOS_P3TIMER            ((volatile uint8_t *) 0x10FDA5)
 
-#define BIOS_P4STATUS        ((volatile uint8_t *) 0x10FDA6)
-#define BIOS_P4PREVIOUS      ((volatile uint8_t *) 0x10FDA7)
-#define BIOS_P4CURRENT       ((volatile uint8_t *) 0x10FDA8)
-#define BIOS_P4CHANGE        ((volatile uint8_t *) 0x10FDA9)
-#define BIOS_P4REPEAT        ((volatile uint8_t *) 0x10FDAA)
-#define BIOS_P4TIMER         ((volatile uint8_t *) 0x10FDAB)
+#define BIOS_P4STATUS           ((volatile uint8_t *) 0x10FDA6)
+#define BIOS_P4PREVIOUS         ((volatile uint8_t *) 0x10FDA7)
+#define BIOS_P4CURRENT          ((volatile uint8_t *) 0x10FDA8)
+#define BIOS_P4CHANGE           ((volatile uint8_t *) 0x10FDA9)
+#define BIOS_P4REPEAT           ((volatile uint8_t *) 0x10FDAA)
+#define BIOS_P4TIMER            ((volatile uint8_t *) 0x10FDAB)
 
-#define BIOS_STATCURRENT     ((volatile uint8_t *) 0x10FDAC)
-#define BIOS_STATCHANGE      ((volatile uint8_t *) 0x10FDAD)
-#define BIOS_CREDIT_DEC      ((volatile uint8_t *) 0x10FDB0)
-#define BIOS_P1CREDIT_DEC    ((volatile uint8_t *) 0x10FDB0)
-#define BIOS_P2CREDIT_DEC    ((volatile uint8_t *) 0x10FDB1)
-#define BIOS_P3CREDIT_DEC    ((volatile uint8_t *) 0x10FDB2)
-#define BIOS_P4CREDIT_DEC    ((volatile uint8_t *) 0x10FDB3)
-#define BIOS_START_FLAG      ((volatile uint8_t *) 0x10FDB4)    // Signal and control to PLAYER_START-rutine
+#define BIOS_STATCURRENT        ((volatile uint8_t *) 0x10FDAC)
+#define BIOS_STATCHANGE         ((volatile uint8_t *) 0x10FDAD)
+#define BIOS_CREDIT_DEC         ((volatile uint8_t *) 0x10FDB0)
+#define BIOS_P1CREDIT_DEC       ((volatile uint8_t *) 0x10FDB0)
+#define BIOS_P2CREDIT_DEC       ((volatile uint8_t *) 0x10FDB1)
+#define BIOS_P3CREDIT_DEC       ((volatile uint8_t *) 0x10FDB2)
+#define BIOS_P4CREDIT_DEC       ((volatile uint8_t *) 0x10FDB3)
+#define BIOS_START_FLAG         ((volatile uint8_t *) 0x10FDB4)    // Signal and control to PLAYER_START-rutine
 
 #define BIOS_PLAYER_MOD_START   ((volatile uint32_t *) 0x10FDBA)
 #define BIOS_PLAYER_MOD1_START  ((volatile uint8_t *)  0x10FDBA)
@@ -259,7 +266,9 @@ typedef void (*subr_fn_t)(void);
 #define BIOS_GAME_MENU_ROW_SIZE         12
 #define BIOS_GAME_MENU_COLUMN_SIZE      24
 #define BIOS_GAME_MENU_SPRITE_BACKUP    ((volatile uint16_t *) 0x10FA00)
-#define BIOS_GAME_MENU                  ((volatile uint8_t *)  0x10FE90) // 0 = Closed/Hidden, 1 = Open/Visable
+#define BIOS_GAME_MENU                  ((volatile uint8_t *)  0x10FE90) // 0 = Closed/Hidden, 1 = Open/Visible
+#define GAME_MENU_HIDDEN                0
+#define GAME_MENU_VISIBLE               1
 #define BIOS_GAME_MENU_TOGGLE           ((volatile uint8_t *)  0x10FE92)
 #define BIOS_GAME_LSPCMODE              ((volatile uint16_t *) 0x10FE94)
 #define BIOS_GAME_PALETTE_1             ((volatile uint32_t *) 0x10FE98)

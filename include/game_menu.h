@@ -3,15 +3,13 @@
 
 #include <stdint.h>
 
-#define LSPC_TIMER_EN   0x0010          /* bit4: enable timer IRQ */
+#define LSPC_TIMER_EN       0x0010          /* bit4: enable timer IRQ */
 
-void game_menu();
-uint8_t hotkey_pressed();
-void menu_init();
-void menu_shutdown();
+void menu_enter();
+void menu_exit();
 void menu_update();
 void menu_toggle();
-uint8_t menu_hotkey_pressed();
+void check_menu_hotkey();
 
 static const uint16_t game_menu_box [] = {
     0x0001, 0x10ff,
