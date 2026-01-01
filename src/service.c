@@ -131,7 +131,7 @@ void show_bios_menu_service() {
 void update_bios_menu_service() {
     *BIOS_MESS_BUSY = 1;
     int8_t menu_items = 7;
-    _move_cursor(menu_items, 0);
+    _move_cursor(menu_items, 0, 0);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
     *address++ = 0x0000;
@@ -246,11 +246,14 @@ volatile uint16_t * _add_string(volatile uint16_t *address, uint8_t selected, ui
 }
 
 // Items counted from 0
-void _move_cursor(int8_t menu_items, int8_t side_items) {
+void _move_cursor(int8_t menu_items, int8_t side_items, int8_t pages) {
     // Menu "go-up"
     if ((*BIOS_P1CHANGE & 0x1) != 0) {
         if (*SERVICE_CURSOR <= 0) {
             *SERVICE_CURSOR = menu_items - 1;
+            if (*SERVICE_CURSOR_PAGE > 0) {
+                *SERVICE_CURSOR_PAGE -= 1;
+            }
         } else {
             *SERVICE_CURSOR -= 1;
         }
@@ -258,6 +261,9 @@ void _move_cursor(int8_t menu_items, int8_t side_items) {
     } else if ((*BIOS_P1CHANGE & 0x2) != 0) {
         if (*SERVICE_CURSOR >= (menu_items - 1)) {
             *SERVICE_CURSOR = 0;
+            if (*SERVICE_CURSOR_PAGE < pages) {
+                *SERVICE_CURSOR_PAGE += 1;
+            }
         } else {
             *SERVICE_CURSOR += 1;
         }

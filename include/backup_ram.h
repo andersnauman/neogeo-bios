@@ -81,6 +81,10 @@ typedef struct {
     demo sound      12      off,on*
     play manual     12      off,on*
     blood           02      off*,on
+    next page       01      -
+    credit/level    04      *on/on,on/off,off/on,off/off
+    language        03      *english,portuguese,spanish
+                    00
 */
 #define BRAM_GAME_DIP_SETTINGS(n)           ((volatile uint8_t *)(0xD00220 + ((n) * 0x10)))   // n=0-7
 // 0xD002A0–0xD0031F : per‑block game names (16 byte each)

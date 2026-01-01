@@ -150,6 +150,7 @@ void reset_system() {
     __asm__ volatile ("jmp 0x00c00500.l");
 }
 
+// TODO: Make it volatile
 void *memset(void *ptr, int value, size_t num) {
     unsigned char *p = (unsigned char *)ptr;
     unsigned char v = (unsigned char)value;
@@ -162,6 +163,7 @@ void *memset(void *ptr, int value, size_t num) {
     return ptr;
 }
 
+// TODO: Make it volatile
 void *memcpy(void *dest, const void *src, size_t num) {
     unsigned char *d = (unsigned char *)dest;
     const unsigned char *s = (const unsigned char *)src;
@@ -172,4 +174,22 @@ void *memcpy(void *dest, const void *src, size_t num) {
     }
 
     return dest;
+}
+
+uint8_t pages_for_items(volatile uint8_t total_items, uint8_t per_page) {
+    uint8_t pages = 0;
+
+    if (per_page == 0 || total_items == 0) {
+        return pages;
+    }
+
+    while (total_items) {
+        pages++;
+        if (total_items <= per_page) {
+            break;
+        }
+        total_items -= per_page;
+    }
+
+    return pages - 1;
 }

@@ -33,8 +33,8 @@ apt-get install cmake gcc-m68k-linux-gnu
    ```sh
    mkdir build
    cd build
-   cmake .. -DSYSTEM=MVS -DREGION=EUROPE
-   cmake --build .
+   cmake -S . -B build -DSYSTEM=MVS -DREGION=EUROPE
+   cmake --build build --parallel
    ```
 3. Burn the ROM to a MC27C1024
 

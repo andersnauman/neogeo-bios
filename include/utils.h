@@ -17,5 +17,6 @@ void pause_system();
 void reset_system();
 void *memset(void *ptr, int value, size_t num);
 void *memcpy(void *dest, const void *src, size_t num);
+uint8_t pages_for_items(volatile uint8_t total_items, uint8_t per_page);
 
 #endif // _UTILS_H

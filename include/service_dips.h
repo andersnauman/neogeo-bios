@@ -3,6 +3,19 @@
 
 #include <stdint.h>
 
+/*
+0x00    16 bytes        Game name
+0x10    6  bytes        Special settings (4 pcs)
+0x16    10 bytes        Simple settings (10 pcs)
+0x20    12 bytes * n    Description + values, each 12 bytes in size
+*/
+#define SOFT_DIPS_NAME_LEN        0x10
+#define SOFT_DIPS_DESC_LEN        0x0C
+#define SOFT_DIPS_HEADER_LEN      32      // Name + DIPS-settings = 0x20 (32)
+#define SOFT_DIPS_SPECIAL_COUNT   2
+#define SOFT_DIPS_SIMPLE_COUNT    10
+#define SOFT_DIPS_PAGE_SIZE       8
+
 void show_bios_menu_hard_dips();
 void update_bios_menu_hard_dips();
 void show_bios_menu_soft_dips();
@@ -11,6 +24,7 @@ void show_bios_menu_soft_dips_cabinet();
 void update_bios_menu_soft_dips_cabinet();
 void show_bios_menu_soft_dips_game();
 void update_bios_menu_soft_dips_game();
+uint8_t _find_dip_offset(uint8_t item);
 
 static const uint16_t bios_menu_hard_dips [] = {
     // 'setting up the hard dips'

@@ -227,7 +227,7 @@ void show_bios_menu_soft_dips() {
 void update_bios_menu_soft_dips() {
     *BIOS_MESS_BUSY = 1;
     uint8_t menu_items = *SERVICE_CURSOR_MAX;
-    _move_cursor(menu_items, 0);
+    _move_cursor(menu_items, 0, 0);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
     *address++ = 0x0000;
@@ -271,7 +271,7 @@ void update_bios_menu_soft_dips_cabinet() {
     *BIOS_MESS_BUSY = 1;
     uint8_t menu_items = 5;
     // TODO: Make the side_items-value dynamic. d = [1 2 1 2 2]; d[*SERVICE_CURSOR]
-    _move_cursor(menu_items, 1);
+    _move_cursor(menu_items, 1, 0);
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
     *address++ = 0x0000;
@@ -460,191 +460,222 @@ void update_bios_menu_soft_dips_cabinet() {
 
 void show_bios_menu_soft_dips_game() {
     *SERVICE_CURSOR_MAX = 0;
+    *SERVICE_CURSOR_PAGE = 0;
     *(uint32_t *)0x400002 = 0x0EEE0000; // Palette 0
     *(uint32_t *)0x400022 = 0x0E000000; // Palette 1
-    *BIOS_MESS_BUSY = 1;
 
-    uint8_t menu_items = 1;
-
-    volatile uint16_t *address = (uint16_t *)BIOS_MESS_BUFFER_PTR;
-    *address = 0x0000;
-    address++;
-    *address = 0x0000;
-    address++;
-
-    // Read text from cartridge for dips options
+    // Activate game slot so we can read software dips and description/values
     *REG_SWPROM = 0;
     *REG_SLOT = *SOFT_DIPS_GAME_SELECT;
 
     uint8_t region = *SROM_COUNTRY_CODE;
-    uint32_t dips_addr = ROM_SOFTDIP_TABLE[region];
+    volatile uint32_t dips_addr = ROM_SOFT_DIP_TABLE[region];
+    // Original dip values from cartridge
     volatile uint8_t *dips = (volatile uint8_t *)dips_addr;
+    dips += SOFT_DIPS_NAME_LEN;
 
-    *address = 0x0003;
-    address++;
-    *address = 0x7145;
-    address++;
-    *address = 0x0108;
-    address++;
-
-    // Game name
-    for (uint8_t i = 0; i < 0x10; i++) {
-        *(volatile uint8_t *)address = *dips;
-        address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
-        dips++;
-    }
-    *address = 0xFFFF;
-    address++;
-
-    // Option values
-    uint8_t choosen_option_value [14];
-    uint16_t choosen_option_offset [14];
-    for (int i = 0; i < 14; i++) {
-        choosen_option_offset[i] = 0xFFFF;
-    }
-    uint16_t *choosen_option_offset_ptr = choosen_option_offset;
-
-    for (uint8_t i = 0; i < 14; i++) {
-        // Values from BRAM is already parsed and bit-shifted
-        choosen_option_value[i] = BRAM_GAME_DIP_SETTINGS(*SOFT_DIPS_GAME_SELECT)[i];
-    }
-
-    // Special time settings
-    uint16_t description_offset = 32;
-    for (uint8_t i = 0; i < 2; i++) {
-        uint16_t setting = *(uint16_t *) dips;
+    // Count all possible settings
+    for (uint8_t i = 0; i < SOFT_DIPS_SPECIAL_COUNT; i++) {
+        if (*(uint16_t *)dips != 0xFFFF) {
+            *SERVICE_CURSOR_MAX += 1;
+        }
         dips += 2;
-        if (setting == 0xFFFF) {
-            continue;
-        }
-        *address = 0x0005;
-        address++;
-        *address = 0x0002;
-        address++;
-        *address = 0x0108;
-        address++;
-        volatile uint8_t *start = (volatile uint8_t *)dips_addr + description_offset;
-        for (uint8_t c = 0; c < 0xC; c++) {
-            *(volatile uint8_t *)address = start[c];
-            address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
-        }
-        *address = 0xFFFF;
-        address++;
-        description_offset += 0xC;
-        *SERVICE_CURSOR_MAX += 1;
     }
-
-    // Special count settings
-    for (uint8_t i = 0; i < 2; i++) {
-        uint8_t setting = *dips;
+    for (uint8_t i = 0; i < SOFT_DIPS_SPECIAL_COUNT; i++) {
+        if (*dips != 0xFF) {
+            *SERVICE_CURSOR_MAX += 1;
+        }
         dips++;
-        if (setting == 0xFF) {
-            continue;
-        }
-        *address = 0x0005;
-        address++;
-        *address = 0x0002;
-        address++;
-        *address = 0x0108;
-        address++;
-        volatile uint8_t *start = (volatile uint8_t *)dips_addr + description_offset;
-        for (uint8_t c = 0; c < 0xC; c++) {
-            *(volatile uint8_t *)address = start[c];
-            address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
-        }
-        *address = 0xFFFF;
-        address++;
-        description_offset += 0xC;
-        *SERVICE_CURSOR_MAX += 1;
     }
-
-    // Simple settings
-    for (uint8_t i = 0; i < 7; i++) {
-        uint8_t setting = *dips;
+    for (uint8_t i = 0; i < SOFT_DIPS_SIMPLE_COUNT; i++) {
+        if (*dips != 0x00) {
+            *SERVICE_CURSOR_MAX += 1;
+        }
         dips++;
-        if (setting == 0x00) {
-            continue;
-        }
-        uint8_t choices = setting & 0x0F;
-        *address = 0x0005;
-        address++;
-        *address = 0x0002;
-        address++;
-        *address = 0x0108;
-        address++;
-        volatile uint8_t *start = (volatile uint8_t *)dips_addr + description_offset;
-        for (uint8_t c = 0; c < 0xC; c++) {
-            *(volatile uint8_t *)address = start[c];
-            address = (volatile uint16_t *)((volatile uint8_t *)address + 1);
-        }
-        *address = 0xFFFF;
-        address++;
-        *choosen_option_offset_ptr = description_offset + 0xC;
-        choosen_option_offset_ptr++;
-        description_offset += 0xC + (0xC * choices);
-        *SERVICE_CURSOR_MAX += 1;
     }
-
-    // Values
-    *address = 0x0003;
-    address++;
-    *address = 0x72c5;
-    address++;
-    for (uint8_t i = 0; i < 2; i++) {
-        *address = 0x0108;
-        address++;
-        uint8_t value = choosen_option_value[i];
-        *address = ((uint16_t)value << 8) | 0xFF;
-        address++;
-    }
-
+    
     *REG_SWPBIOS = 0;
-
-    *address = 0x0000;
-    address++;
-    *BIOS_MESS_POINT = (volatile uint32_t)address;
-
-    *BIOS_MESS_BUSY = 0;
 }
 
 void update_bios_menu_soft_dips_game() {
     *BIOS_MESS_BUSY = 1;
-    int8_t menu_items = *SERVICE_CURSOR_MAX;
-    _move_cursor(menu_items, 0);
+
+    uint8_t start = *SERVICE_CURSOR_PAGE * SOFT_DIPS_PAGE_SIZE;
+    uint8_t remaining = (start < *SERVICE_CURSOR_MAX) ? (*SERVICE_CURSOR_MAX - start) : 0;
+    uint8_t menu_items = (remaining > SOFT_DIPS_PAGE_SIZE) ? SOFT_DIPS_PAGE_SIZE : remaining;
+
+    uint8_t pages = pages_for_items(*SERVICE_CURSOR_MAX, SOFT_DIPS_PAGE_SIZE);
+    *SERVICE_CURSOR_PAGE_PREV = *SERVICE_CURSOR_PAGE;
+    _move_cursor(menu_items, 0, pages);
+
+    if (*SERVICE_CURSOR_PAGE < *SERVICE_CURSOR_PAGE_PREV) {
+        *SERVICE_CURSOR = SOFT_DIPS_PAGE_SIZE - 1;
+    }
+    if (*SERVICE_CURSOR_PAGE != *SERVICE_CURSOR_PAGE_PREV) {
+        reset_fix_layer();
+        return;
+    }
 
     volatile uint16_t *address = (volatile uint16_t *)*BIOS_MESS_POINT;
-    *address = 0x0000;
-    address++;
-    *address = 0x0000;
-    address++;
+    *address++ = 0x0000;
+    *address++ = 0x0000;
 
-    *address = 0x0003;
-    address++;
-    *address = 0x70E8;
-    address++;        
+    *address++ = 0x0003;
+    *address++ = 0x70E6;
 
     for (int8_t i = 0; i < menu_items; i++) {
         if (i != *SERVICE_CURSOR) {
-            *address = 0x0108;
-            address++;
-            *address = 0x20FF;  // Space (overwrite arrow)
-            address++;
+            *address++ = 0x0108;
+            *address++ = 0x20FF;  // Space (overwrite arrow)
         } else {
-            *address = 0x1108;
-            address++;
-            *address = 0x11FF;  // Arrow
-            address++;
+            *address++ = 0x1108;
+            *address++ = 0x11FF;  // Arrow
         }
         if (menu_items - 1 != i) {
-            *address = 0x0005;
-            address++;
-            *address = 0x0002;
-            address++;
+            *address++ = 0x0005;
+            *address++ = 0x0002;
         }
     }
 
-    *address = 0x0000;
-    address++;
+    // If 'A' button is pressed
+    if ((*BIOS_P1CHANGE & A_BUTTON) != 0) {
+
+    }
+
+    uint8_t menu_item_counter = 0;
+
+    // Activate game slot so we can read software dips and description/values
+    *REG_SWPROM = 0;
+    *REG_SLOT = *SOFT_DIPS_GAME_SELECT;
+
+    uint8_t region = *SROM_COUNTRY_CODE;
+    volatile uint32_t dips_addr = ROM_SOFT_DIP_TABLE[region];
+    // Original dip values from cartridge
+    volatile uint8_t *dips = (volatile uint8_t *)dips_addr;
+    // Saved dip values from backup ram
+    volatile uint8_t *chosen_dip_value = BRAM_GAME_DIP_SETTINGS(*SOFT_DIPS_GAME_SELECT);
+
+    *address++ = 0x0003;
+    *address++ = 0x7143;
+    *address++ = 0x0108;
+
+    // Game name
+    memcpy((void *)address, (void *)dips_addr, SOFT_DIPS_NAME_LEN);
+    address = (volatile uint16_t *)((volatile uint8_t *)address + SOFT_DIPS_NAME_LEN);
+    *address++ = 0xFFFF;
+
+    // Special time settings (description)
+    uint16_t description_offset = SOFT_DIPS_HEADER_LEN;
+    for (uint8_t i = 0; i < SOFT_DIPS_SPECIAL_COUNT; i++) {
+        uint16_t dip_value = *(uint16_t *)chosen_dip_value;
+        chosen_dip_value += 2;
+        if (dip_value == 0xFFFF) {
+            continue;
+        }
+
+        if (menu_item_counter < start || menu_item_counter > start + SOFT_DIPS_PAGE_SIZE) {
+            goto _special_time_settings_end;
+        }
+       
+        *address++ = 0x0005;
+        *address++ = 0x0002;
+        *address++ = 0x0108;
+
+        // Print the description
+        memcpy((void *)address, (void *)(dips_addr + description_offset), SOFT_DIPS_DESC_LEN);
+        address = (volatile uint16_t *)((volatile uint8_t *)address + SOFT_DIPS_DESC_LEN);
+
+        *address++ = 0xFFFF;
+
+_special_time_settings_end:
+        description_offset += SOFT_DIPS_DESC_LEN;
+        menu_item_counter += 1;
+    }
+
+    // Special count settings
+    for (uint8_t i = 0; i < SOFT_DIPS_SPECIAL_COUNT; i++) {
+        uint8_t dip_value = *chosen_dip_value++;
+        if (dip_value == 0xFF) {
+            continue;
+        }
+
+        if (menu_item_counter < start || menu_item_counter > start + SOFT_DIPS_PAGE_SIZE) {
+            goto _special_count_settings_end;
+        }
+
+        *address++ = 0x0005;
+        *address++ = 0x0002;
+        *address++ = 0x0108;
+
+        // Print the description
+        memcpy((void *)address, (void *)(dips_addr + description_offset), SOFT_DIPS_DESC_LEN);
+        address = (volatile uint16_t *)((volatile uint8_t *)address + SOFT_DIPS_DESC_LEN);
+
+        // Add a few extra space
+        *address++ = 0x2020;
+
+        // Print the choosen value
+        uint8_t value = to_bcd8(dip_value);
+        uint8_t upper = (value >> 4) & 0x0F;
+        uint8_t lower = value & 0x0F;
+        *address++ = ((upper + 0x30) << 8) | (lower + 0x30);
+
+        *address++ = 0xFFFF;
+
+_special_count_settings_end:
+        description_offset += SOFT_DIPS_DESC_LEN;
+        menu_item_counter += 1;
+    }
+
+    // Offset the cartridge dips to start at the simple setting values
+    dips += SOFT_DIPS_NAME_LEN + 6;
+
+    // Simple settings
+    for (uint8_t i = 0; i < SOFT_DIPS_SIMPLE_COUNT; i++) {
+        uint8_t dip_value = *chosen_dip_value++;
+        uint8_t default_dip_value = *dips >> 4;
+        uint8_t choices = (*dips++) & 0x0F;
+        if (choices == 0x00) {
+            continue;
+        }
+
+        // Reset dip-value if it for some reason goes above the number of choices.
+        if (dip_value >= choices) {
+            dip_value = default_dip_value;
+        }
+        
+        if (menu_item_counter < start || menu_item_counter > start + SOFT_DIPS_PAGE_SIZE) {
+            goto _simple_settings_end;
+        }
+
+        *address++ = 0x0005;
+        *address++ = 0x0002;
+        *address++ = 0x0108;
+
+        // Print the description
+        memcpy((void *)address, (void *)(dips_addr + description_offset), SOFT_DIPS_DESC_LEN);
+        address = (volatile uint16_t *)((volatile uint8_t *)address + SOFT_DIPS_DESC_LEN);
+
+        // Add a few extra space
+        *address++ = 0x2020;
+
+        // Add an offset to the choosen dip setting
+        uint16_t dips_offset = SOFT_DIPS_DESC_LEN;
+        dips_offset += dip_value * SOFT_DIPS_DESC_LEN;
+
+        // Print the choosen value
+        memcpy((void *)address, (void *)(dips_addr + description_offset + dips_offset), SOFT_DIPS_DESC_LEN);
+        address = (volatile uint16_t *)((volatile uint8_t *)address + SOFT_DIPS_DESC_LEN);
+        *address++ = 0xFFFF;
+
+_simple_settings_end:
+        description_offset += SOFT_DIPS_DESC_LEN + (SOFT_DIPS_DESC_LEN * choices);
+        menu_item_counter += 1;
+    }
+
+    *REG_SWPBIOS = 0;
+
+    *address++ = 0x0000;
     *BIOS_MESS_POINT = (volatile uint32_t)address;
 
     *BIOS_MESS_BUSY = 0;

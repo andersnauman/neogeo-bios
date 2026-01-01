@@ -224,10 +224,10 @@ Game tells the BIOS where it is:
 #define ROM_GAME_SAVE_SIZE       ((volatile uint16_t *) 0x000112)   // Size of the game's save size (in bytes).
 #define ROM_EYECATCH_FLAG        ((volatile uint8_t  *) 0x000114)   // Determines how/if the BIOS plays the eyecatcher sequence. (0=handled by BIOS; 1=handled by game; 2=don't show)
 #define ROM_EYECATCH_SPRITE_BANK ((volatile uint8_t  *) 0x000115)   // Defines the upper 8 bits of the tile number for the eyecatcher, if handled by the BIOS.
-#define ROM_SOFTDIP_TABLE        ((volatile uint32_t *) 0x000116)
-#define ROM_JPN_SOFTDIP          ((volatile uint32_t *) 0x000116)
-#define ROM_USA_SOFTDIP          ((volatile uint32_t *) 0x00011A)
-#define ROM_EU_SOFTDIP           ((volatile uint32_t *) 0x00011E)
+#define ROM_SOFT_DIP_TABLE       ((volatile uint32_t *) 0x000116)
+#define ROM_JPN_SOFT_DIP         ((volatile uint32_t *) 0x000116)
+#define ROM_USA_SOFT_DIP         ((volatile uint32_t *) 0x00011A)
+#define ROM_EU_SOFT_DIP          ((volatile uint32_t *) 0x00011E)
 #define ROM_SECURITY_CODE_PTR    (*(volatile uint32_t*) 0x000182)
 
 static const uint8_t security_bytes [] = {

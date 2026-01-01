@@ -63,7 +63,7 @@ void menu_update() {
     *address++ = 0x0007;
     // Insert game name and dip settings
     uint8_t region = *SROM_COUNTRY_CODE;    
-    uint32_t dips_addr = ROM_SOFTDIP_TABLE[region];
+    uint32_t dips_addr = ROM_SOFT_DIP_TABLE[region];
     volatile uint8_t *dips = (volatile uint8_t *)(uint32_t)dips_addr;
     dips += 32;
     for (uint8_t i = 0; i < 12; i++) {

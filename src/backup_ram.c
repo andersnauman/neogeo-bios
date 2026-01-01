@@ -295,7 +295,7 @@ void save_game_data() {
 
     // Copy metadata
     uint8_t region = *SROM_COUNTRY_CODE;
-    volatile uint32_t dips_addr = ROM_SOFTDIP_TABLE[region];
+    volatile uint32_t dips_addr = ROM_SOFT_DIP_TABLE[region];
     volatile uint8_t *dips = (volatile uint8_t *)dips_addr;
 
     // Copy the game name to backup ram block
@@ -359,7 +359,7 @@ uint16_t find_game_data_block_by_name() {
     uint16_t block = 0xFF;
     for (uint8_t i = 0; i < 8; i++) {
         uint8_t region = *SROM_COUNTRY_CODE;
-        uint32_t dips_addr = ROM_SOFTDIP_TABLE[region];
+        uint32_t dips_addr = ROM_SOFT_DIP_TABLE[region];
         volatile uint8_t *cartridge_game_name = (volatile uint8_t *)(uint32_t)dips_addr;
 
         volatile uint8_t *block_game_name = BRAM_GAME_NAME(i);
