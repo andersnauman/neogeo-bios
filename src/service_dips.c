@@ -537,9 +537,14 @@ void update_bios_menu_soft_dips_game() {
         }
     }
 
+    // Saved dip values from backup ram
+    volatile uint8_t *chosen_dip_value = BRAM_GAME_DIP_SETTINGS(*SOFT_DIPS_GAME_SELECT);
+
     // If 'A' button is pressed
     if ((*BIOS_P1CHANGE & A_BUTTON) != 0) {
-
+        _change_bram_dip(*SERVICE_CURSOR + (*SERVICE_CURSOR_PAGE * SOFT_DIPS_PAGE_SIZE), 1);
+    } else if ((*BIOS_P1CHANGE & B_BUTTON) != 0) {
+        _change_bram_dip(*SERVICE_CURSOR + (*SERVICE_CURSOR_PAGE * SOFT_DIPS_PAGE_SIZE), -1);
     }
 
     uint8_t menu_item_counter = 0;
@@ -552,8 +557,6 @@ void update_bios_menu_soft_dips_game() {
     volatile uint32_t dips_addr = ROM_SOFT_DIP_TABLE[region];
     // Original dip values from cartridge
     volatile uint8_t *dips = (volatile uint8_t *)dips_addr;
-    // Saved dip values from backup ram
-    volatile uint8_t *chosen_dip_value = BRAM_GAME_DIP_SETTINGS(*SOFT_DIPS_GAME_SELECT);
 
     *address++ = 0x0003;
     *address++ = 0x7143;
@@ -679,4 +682,75 @@ _simple_settings_end:
     *BIOS_MESS_POINT = (volatile uint32_t)address;
 
     *BIOS_MESS_BUSY = 0;
+}
+
+void _change_bram_dip(uint8_t item, int8_t direction) {
+    *REG_SWPROM = 0;
+    *REG_SLOT = *SOFT_DIPS_GAME_SELECT;
+
+    volatile uint8_t *bram_dip_values = BRAM_GAME_DIP_SETTINGS(*SOFT_DIPS_GAME_SELECT);
+
+    uint8_t region = *SROM_COUNTRY_CODE;
+    volatile uint32_t dips_addr = ROM_SOFT_DIP_TABLE[region];
+    // Original dip values from cartridge
+    volatile uint8_t *dips = (volatile uint8_t *)dips_addr;
+    dips += SOFT_DIPS_NAME_LEN;
+
+    uint8_t offset = 0;
+    uint8_t dip_count = 0;
+
+    int8_t value = 0;
+
+    // Count all possible settings
+    for (uint8_t i = 0; i < SOFT_DIPS_SPECIAL_COUNT; i++) {
+        if (*(uint16_t *)(dips + offset) != 0xFFFF) {
+            dip_count++;
+        }
+        if ((dip_count - 1) != item) {
+            offset += 2;
+            continue;
+        }
+        goto _change_bram_dip;
+    }
+    for (uint8_t i = 0; i < SOFT_DIPS_SPECIAL_COUNT; i++) {
+        if (*(dips + offset) != 0xFF) {
+            dip_count++;
+        }
+        if ((dip_count - 1) != item) {
+            offset++;
+            continue;
+        }
+        value = *(bram_dip_values + offset);
+        value += direction;
+        if (value >= 100) {
+            value = 1;
+        } else if (value <= 0) {
+            value = 99;             // saved value 'is' BCD (= max 99)
+        }
+        goto _change_bram_dip;
+    }
+    for (uint8_t i = 0; i < SOFT_DIPS_SIMPLE_COUNT; i++) {
+        if (*(dips + offset) != 0x00) {
+            dip_count++;
+        }
+        if ((dip_count - 1) != item) {
+            offset++;
+            continue;
+        }
+        uint8_t choices = (*(dips + offset)) & 0x0F;
+        value = *(bram_dip_values + offset);
+        value += direction;
+        if (value >= choices ) {
+            value = 0;
+        } else if (value < 0) {
+            value = choices - 1;    // saved value is zero-based
+        }
+        goto _change_bram_dip;
+    }
+
+_change_bram_dip:
+    unlock_backup_ram();
+    *(bram_dip_values + offset) = value;
+    lock_backup_ram();
+    *REG_SWPBIOS = 0;
 }

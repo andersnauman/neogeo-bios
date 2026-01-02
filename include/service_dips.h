@@ -24,7 +24,7 @@ void show_bios_menu_soft_dips_cabinet();
 void update_bios_menu_soft_dips_cabinet();
 void show_bios_menu_soft_dips_game();
 void update_bios_menu_soft_dips_game();
-uint8_t _find_dip_offset(uint8_t item);
+void _change_bram_dip(uint8_t item, int8_t direction);
 
 static const uint16_t bios_menu_hard_dips [] = {
     // 'setting up the hard dips'

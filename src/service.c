@@ -13,6 +13,7 @@
 void show_bios_menu() {
     reset_fix_layer();
     reset_palettes();
+    *REG_NOSHADOW = 0;
 
     uint8_t menu = MENU_BIOS_MAIN;
     int8_t cursor_sp = 0;
